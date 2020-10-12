@@ -102,6 +102,19 @@ class Shopcart(db.Model):
             )
         return self
 
+    @classmethod
+    def init_db(cls, app):
+        """Initializes the database session
+        :param app: the Flask app
+        :type data: Flask
+        """
+        cls.logger.info("Initializing database")
+        cls.app = app
+        # This is where we initialize SQLAlchemy from the Flask app
+        db.init_app(app)
+        app.app_context().push()
+        db.create_all()  # make our sqlalchemy tables
+
 class ShopcartItem(db.Model):
     """
     Class that represents a ShopcartItem
@@ -165,17 +178,16 @@ class ShopcartItem(db.Model):
                 "Invalid shopcart item: body of request contained bad or no data"
             )
         return self
-
-
-
-def init_db(cls, app):
-    """Initializes the database session
-    :param app: the Flask app
-    :type data: Flask
-    """
-    cls.logger.info("Initializing database")
-    cls.app = app
-    # This is where we initialize SQLAlchemy from the Flask app
-    db.init_app(app)
-    app.app_context().push()
-    db.create_all()  # make our sqlalchemy tables
+      
+    @classmethod
+    def init_db(cls, app):
+        """Initializes the database session
+        :param app: the Flask app
+        :type data: Flask
+        """
+        cls.logger.info("Initializing database")
+        cls.app = app
+        # This is where we initialize SQLAlchemy from the Flask app
+        db.init_app(app)
+        app.app_context().push()
+        db.create_all()  # make our sqlalchemy tables
