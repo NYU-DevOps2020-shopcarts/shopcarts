@@ -24,6 +24,7 @@ from service.models import Shopcart, ShopcartItem, DataValidationError, db
 from service import app
 
 DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///../db/test.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 ######################################################################
 #  T E S T   C A S E S

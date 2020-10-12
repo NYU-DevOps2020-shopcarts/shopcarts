@@ -1,25 +1,38 @@
 # shopcarts
+
+![](https://travis-ci.org/NYU-DevOps2020-shopcarts/shopcarts.svg?branch=master)
+
 The shopcarts resource allows customers to make a collection of products that they want to purchase
 
 ## models for shopcarts 
-### Shopcart -
+### Shopcart
 #### Attributes:
 -----------
 id (int) - shop cart id
+
 user_id (int) - user id
+
 create_time (DateTime) - the time this shopcart was created
+
 update_time (DateTime) - the time this shopcart was updated
 
 ### ShopcartItem - Contains product information for an item in a shopcart
 #### Attributes:
 -----------
 id (int) - for index purpose
+
 sid (int) - shop cart id
+
 sku (int) - product id
+
 name (string) - product name
+
 price (float) - price for one
+
 amount (int) - number of product
+
 create_time (DateTime) - the time this product was created
+
 update_time (DateTime) - the time this product was updated
 
 ## Manually running the Tests

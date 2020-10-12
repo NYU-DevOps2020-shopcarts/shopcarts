@@ -179,4 +179,3 @@ def init_db(cls, app):
     db.init_app(app)
     app.app_context().push()
     db.create_all()  # make our sqlalchemy tables
-    
