@@ -16,7 +16,6 @@ Models for Shopcarts
 All of the models are stored in this module
 Models
 ------
-
 Shopcart -
 Attributes:
 -----------
@@ -24,7 +23,6 @@ id (int) - shop cart id
 user_id (int) - user id
 create_time (DateTime) - the time this shopcart was created
 update_time (DateTime) - the time this shopcart was updated
-
 ShopcartItem - Contains product information for an item in a shopcart
 Attributes:
 -----------
@@ -80,7 +78,7 @@ class Shopcart(db.Model):
             "create_time": self.create_time,
             "update_time": self.update_time,
         }
-
+         
     def deserialize(self, data: dict):
         """
         Deserializes a Shopcart from a dictionary

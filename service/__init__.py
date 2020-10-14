@@ -16,6 +16,7 @@
 """
 Package for the application models and service routes
 """
+import logging
 from flask import Flask
 
 # NOTE: Do not change the order of this code
@@ -25,5 +26,23 @@ from flask import Flask
 # Create the Flask aoo
 app = Flask(__name__)
 
+# Load Configurations
+app.config.from_object('config')
+
 # Import the routes After the Flask app is created
 from service import routes
+
+# Set up logging for production
+app.logger.propagate = False
+print('Setting up logging for {}...'.format(__name__))
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    if gunicorn_logger:
+        app.logger.handlers = gunicorn_logger.handlers
+        app.logger.setLevel(gunicorn_logger.level)
+
+app.logger.info(70 * '*')
+app.logger.info('  S H O P C A R T   S E R V I C E   R U N N I N G  '.center(70, '*'))
+app.logger.info(70 * '*')
+
+app.logger.info('Service inititalized!')

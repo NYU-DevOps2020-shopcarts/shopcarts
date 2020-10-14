@@ -58,3 +58,7 @@ You can also manually run `nosetests` with `coverage` (but `setup.cfg` does this
 ```shell
     $ nosetests --with-coverage --cover-package=service
 ```
+
+## Logging Services
+
+Logging is set up to track events.
