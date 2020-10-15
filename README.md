@@ -4,6 +4,24 @@
 
 The shopcarts resource allows customers to make a collection of products that they want to purchase
 
+## Run The Service
+
+### Development Mode
+
+To run the service in development mode, please use:
+
+```bash
+FLASK_APP=service FLASK_ENV=development flask run -h 0.0.0.0 -p 5000
+```
+
+### Production Mode
+
+The project uses *honcho* which gets it's commands from the `Procfile`. To start the service in production mode, simply use:
+
+```bash
+honcho start
+```
+
 ## models for shopcarts 
 ### Shopcart
 #### Attributes:
