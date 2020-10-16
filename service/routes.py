@@ -18,6 +18,8 @@ Shopcart Service with UI
 Paths:
 ------
 GET / - Displays a usage information for Selenium testing
+POST /shopcarts - creates a new shopcart record in the database
+POST /shopcartitems - creates a new shopcart item record in the database
 """
 
 import sys
@@ -25,8 +27,84 @@ import logging
 from flask import jsonify, request, json, url_for, make_response, abort
 from flask_api import status  # HTTP Status Codes
 from werkzeug.exceptions import NotFound
+
+from .models import Shopcart, ShopcartItem, DataValidationError
+
 from . import app
 
+######################################################################
+# Error Handlers
+######################################################################
+@app.errorhandler(DataValidationError)
+def request_validation_error(error):
+    """ Handles Value Errors from bad data """
+    return bad_request(error)
+
+
+@app.errorhandler(status.HTTP_400_BAD_REQUEST)
+def bad_request(error):
+    """ Handles bad reuests with 400_BAD_REQUEST """
+    app.logger.warning(str(error))
+    return (
+        jsonify(
+            status=status.HTTP_400_BAD_REQUEST, error="Bad Request", message=str(error)
+        ),
+        status.HTTP_400_BAD_REQUEST,
+    )
+
+
+@app.errorhandler(status.HTTP_404_NOT_FOUND)
+def not_found(error):
+    """ Handles resources not found with 404_NOT_FOUND """
+    app.logger.warning(str(error))
+    return (
+        jsonify(
+            status=status.HTTP_404_NOT_FOUND, error="Not Found", message=str(error)
+        ),
+        status.HTTP_404_NOT_FOUND,
+    )
+
+
+@app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
+def method_not_supported(error):
+    """ Handles unsuppoted HTTP methods with 405_METHOD_NOT_SUPPORTED """
+    app.logger.warning(str(error))
+    return (
+        jsonify(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+            error="Method not Allowed",
+            message=str(error),
+        ),
+        status.HTTP_405_METHOD_NOT_ALLOWED,
+    )
+
+
+@app.errorhandler(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+def mediatype_not_supported(error):
+    """ Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE """
+    app.logger.warning(str(error))
+    return (
+        jsonify(
+            status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            error="Unsupported media type",
+            message=str(error),
+        ),
+        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+    )
+
+
+@app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
+def internal_server_error(error):
+    """ Handles unexpected server error with 500_SERVER_ERROR """
+    app.logger.error(str(error))
+    return (
+        jsonify(
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            error="Internal Server Error",
+            message=str(error),
+        ),
+        status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
 
 ######################################################################
 # GET HEALTH CHECK
@@ -44,8 +122,56 @@ def healthcheck():
 def index():
     data = '{id: <string>, user_id: <string>}'
     url = request.base_url + 'shopcarts'  # url_for('shopcarts')
-    return jsonify(name='Shopcart Demo REST API Service', version='1.0', url=url, data=data), status.HTTP_200_OK
+    return jsonify(name='Shopcart Demo REST API Service', version='1.0', 
+                   url=url, data=data), status.HTTP_200_OK
 
+######################################################################
+# ADD A NEW SHOPCART
+######################################################################
+@app.route("/shopcarts", methods=["POST"])
+def create_shopcarts():
+    """
+    Creates a Shopcart
+    This endpoint will create a Shopcart based the data in the body that is posted
+    """
+    app.logger.info("Request to create a shopcart")
+    check_content_type("application/json")
+    shopcart = Shopcart()
+    shopcart.deserialize(request.get_json())
+    shopcart.create()
+    message = shopcart.serialize()
+    #TODO: location_url = url_for("get_shopcarts", shopcart_id=shopcart.id, _external=True)
+    location_url = request.base_url + 'shopcarts'
+
+    app.logger.info("Shopcart with ID [%s] created.", shopcart.id)
+    return make_response(
+        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+    )
+
+######################################################################
+# ADD A NEW SHOPCARTITEM
+######################################################################
+@app.route("/shopcartitems", methods=["POST"])
+def create_shopcart_items():
+    """
+    Creates a ShopcartItem
+    This endpoint will create a ShopcartItem based the data in the body that is posted
+    """
+    app.logger.info("Request to create a shopcart item")
+    check_content_type("application/json")
+    shopcart_item = ShopcartItem()
+    print(request.get_json)
+    shopcart_item.deserialize(request.get_json())
+    shopcart_item.create()
+    message = shopcart_item.serialize()
+    #TODO: location_url = url_for("get_shopcart_items", 
+    #                              shopcart_item_id=shopcart_item.id, _external=True)
+    location_url = request.base_url + 'shopcartitems'
+
+    app.logger.info("ShopcartItem with ID [%s] created.", shopcart_item.id)
+    return make_response(
+        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+    )
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
@@ -55,8 +181,9 @@ def index():
 def check_content_type(content_type):
     """ Checks that the media type is correct """
     if 'Content-Type' not in request.headers:
-        app.logger.error('No Content-Type specified.')
-        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, 'Content-Type must be {}'.format(content_type))
+        #app.logger.error('No Content-Type specified.')
+        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, 
+        'Content-Type must be {}'.format(content_type))
 
     if request.headers['Content-Type'] == content_type:
         return

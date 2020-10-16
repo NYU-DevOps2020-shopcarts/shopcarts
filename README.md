@@ -80,3 +80,40 @@ You can also manually run `nosetests` with `coverage` (but `setup.cfg` does this
 ## Logging Services
 
 Logging is set up to track events.
+
+## Creating a Shopcart or Shopcart Item
+A shopcart can be created with a `POST` request on `'/shopcarts'` with, for example, the required conent including the following parameters:
+
+    {
+
+        "id": null, 
+
+        "user_id": 101, 
+
+        "create_time": null, 
+    
+        "update_time": null
+    
+    }
+
+A shopcart item can be created with a `POST` request on `/shopcartitems'`  with required parameters: 
+
+    {
+        
+        "id": null, 
+        
+        "sid": 100, 
+        
+        "sku": 5000, 
+        
+        "name": "soap", 
+        
+        "price": 2.23, 
+        
+        "amount": 3, 
+        
+        "create_time": null, 
+        
+        "update_time": null
+    
+    }
