@@ -134,7 +134,9 @@ class Shopcart(db.Model):
                 self.create_time = None
                 self.update_time = None
 
-            self.id = data["id"]
+            if "id" in data:
+                self.id = data["id"]
+
             self.user_id = data["user_id"]
         except KeyError as error:
             raise DataValidationError("Invalid shopcart: missing " + error.args[0])
@@ -249,7 +251,9 @@ class ShopcartItem(db.Model):
                 self.create_time = None
                 self.update_time = None
 
-            self.id = data["id"]
+            if "id" in data:
+                self.id = data["id"]
+
             self.sid = data["sid"]
             self.sku = data["sku"]
             self.name = data["name"]

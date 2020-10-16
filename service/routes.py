@@ -211,4 +211,11 @@ def initialize_logging(log_level=app.config['LOGGING_LEVEL']):
             app.logger.removeHandler(log_handler)
         app.logger.addHandler(handler)
         app.logger.setLevel(log_level)
-        app.logger.info('Logging handler established')    
+        app.logger.info('Logging handler established')
+
+
+def init_db():
+    """ Initialies the SQLAlchemy app """
+    global app
+    Shopcart.init_db(app)
+    ShopcartItem.init_db(app)

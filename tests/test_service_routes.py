@@ -134,6 +134,38 @@ class TestShopcartServer(TestCase):
         #    new_shopcart["update_time"], "Update time not set"
         #)
 
+    def test_create_shopcart_with_pure_json(self):
+        """ Create a new Shopcart with pure JSON """
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post(
+            "/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, HTTP_201_CREATED)
+        # Make sure location header is set
+        location = resp.headers.get("Location", None)
+        self.assertTrue(location != None)
+        # Check the data is correct
+        new_shopcart = resp.get_json()
+        self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
+        #times set by db
+        self.assertIsNotNone(new_shopcart["create_time"],
+                             "Creation time not set")
+        self.assertIsNotNone(new_shopcart["update_time"],
+                             "Update time not set")
+        #TODO after Get Added
+        # Check that the location header was correct
+        #resp = self.app.get(location, content_type="application/json")
+        #self.assertEqual(resp.status_code, HTTP_200_OK)
+        #new_shopcart = resp.get_json()
+        #self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
+        #times set by db
+        #self.assertIsNotNone(
+        #    new_shopcart["create_time"], "Creation time not set"
+        #)
+        #self.assertIsNotNone(
+        #    new_shopcart["update_time"], "Update time not set"
+        #)
+
 ######################################################################
 #  S H O P C A R T I T E M   T E S T   C A S E S
 ######################################################################
