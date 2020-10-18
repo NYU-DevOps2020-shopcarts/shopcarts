@@ -24,6 +24,7 @@ import os
 import unittest
 from unittest import TestCase
 import logging
+from flask_api import status  # HTTP Status Codes
 from werkzeug.datastructures import MultiDict, ImmutableMultiDict
 from shopcart_factory import ShopcartFactory, ShopcartItemFactory
 from service.models import Shopcart, ShopcartItem, DataValidationError, db
@@ -165,6 +166,15 @@ class TestShopcartServer(TestCase):
         #self.assertIsNotNone(
         #    new_shopcart["update_time"], "Update time not set"
         #)
+
+    def test_get_shopcart_list(self):
+        """ Get a list of Shopcarts """
+        self._create_shopcarts(5)
+        resp = self.app.get("/shopcarts")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 5)
+
 
 ######################################################################
 #  S H O P C A R T I T E M   T E S T   C A S E S

@@ -117,3 +117,29 @@ A shopcart item can be created with a `POST` request on `/shopcartitems'`  with 
         "update_time": null
     
     }
+
+## Getting Shopcart list
+A shopcart list can be got with a `GET` request on `'/shopcarts'`. The response will be something like 
+
+```json
+[
+    {
+        "create_time": "2020-10-17T04:17:28.593445",
+        "id": 1,
+        "update_time": "2020-10-17T04:17:28.593445",
+        "user_id": 435345
+    },
+    {
+        "create_time": "2020-10-17T04:17:29.696271",
+        "id": 2,
+        "update_time": "2020-10-17T04:17:29.696271",
+        "user_id": 435345
+    },
+    {
+        "create_time": "2020-10-17T04:17:30.522651",
+        "id": 3,
+        "update_time": "2020-10-17T04:17:30.522651",
+        "user_id": 435345
+    }
+]
+```

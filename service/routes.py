@@ -20,6 +20,7 @@ Paths:
 GET / - Displays a usage information for Selenium testing
 POST /shopcarts - creates a new shopcart record in the database
 POST /shopcartitems - creates a new shopcart item record in the database
+GET /shopcarts - Returns a list all of the Shopcarts
 """
 
 import sys
@@ -172,6 +173,22 @@ def create_shopcart_items():
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
+
+
+######################################################################
+# LIST ALL Shopcarts
+######################################################################
+@app.route('/shopcarts', methods=['GET'])
+def list_shopcarts():
+    """ Returns all of the Shopcarts """
+    app.logger.info('Request to list Shopcarts...')
+    app.logger.info('Find all')
+    shopcarts = Shopcart.all()
+
+    app.logger.info('[%s] Shopcarts returned', len(shopcarts))
+    results = [shopcart.serialize() for shopcart in shopcarts]
+    return make_response(jsonify(results), status.HTTP_200_OK)
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

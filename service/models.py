@@ -159,6 +159,13 @@ class Shopcart(db.Model):
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
 
+    @classmethod
+    def all(cls):
+        """ Returns all of the Pets in the database """
+        cls.logger.info("Processing all Pets")
+        return cls.query.all()
+
+
 class ShopcartItem(db.Model):
     """
     Class that represents a ShopcartItem
