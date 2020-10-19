@@ -83,40 +83,27 @@ Logging is set up to track events.
 
 ## Creating a Shopcart or Shopcart Item
 A shopcart can be created with a `POST` request on `'/shopcarts'` with, for example, the required conent including the following parameters:
-
-    {
-
-        "id": null, 
-
-        "user_id": 101, 
-
-        "create_time": null, 
-    
-        "update_time": null
-    
-    }
-
+```json
+{
+    "id": null,
+    "user_id": 101,
+    "create_time": null,
+    "update_time": null
+}
+```
 A shopcart item can be created with a `POST` request on `/shopcartitems'`  with required parameters: 
-
-    {
-        
-        "id": null, 
-        
-        "sid": 100, 
-        
-        "sku": 5000, 
-        
-        "name": "soap", 
-        
-        "price": 2.23, 
-        
-        "amount": 3, 
-        
-        "create_time": null, 
-        
-        "update_time": null
-    
-    }
+```json
+{
+    "id": null,
+    "sid": 100,
+    "sku": 5000,
+    "name": "soap",
+    "price": 2.23,
+    "amount": 3,
+    "create_time": null,
+    "update_time": null
+}
+```
 
 ## Getting the items in a shopcart
 To get the list of items in a shopcart, you can hit a `GET` request with the id of the shopcart you are looking for. 
@@ -190,3 +177,10 @@ A shopcart list can be got with a `GET` request on `'/shopcarts'`. The response 
     }
 ]
 ```
+
+## Querying Shopcarts
+A shopcart can be queried by user with a `GET` request on `/shopcarts` with the user_id set in the query string of the request, for example, `/shopcarts?user_id=100`
+The response will be the shopcart for that user, or 404 if a shopcart does not exist for that user.
+
+Shopcart items can be queried by sku, name, price, or amount with a `GET` request on `/shopcartitems` with the appropriate field indicated in the query of the request, for example, `/shopcartitems?sku=1000`
+The response will be a list of shopcart items where the indicated field has the desired value, or 404 if no shopcart items contain a field with that value.

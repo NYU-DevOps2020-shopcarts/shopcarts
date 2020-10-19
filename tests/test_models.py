@@ -147,8 +147,9 @@ class TestShopcarts(unittest.TestCase):
         data = "this is not a dictionary"
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
-    
+
     def test_find_shopcart(self):
+        """ Find a Shopcart by id """
         date_time = datetime.now()
         date_time_str = datetime.isoformat(date_time)
         data = {"id": 1, "user_id": 120, "create_time": date_time_str, "update_time": date_time_str}
@@ -156,14 +157,16 @@ class TestShopcarts(unittest.TestCase):
         shopcart_queried = Shopcart.find(1)
         self.assertEqual(data["id"],shopcart_queried.id)
         self.assertEqual(data["user_id"],shopcart_queried.user_id)
-    
+
     def test_find_shopcart_with_non_existing_shopcart(self):
+        """ Find a Shopcart that doesn't exist """
         shopcart_queried = Shopcart.find(1)
         self.assertIsNone(shopcart_queried)
-    
+
     def test_all_shopcarts(self):
+        """ Get all Shopcarts"""
         count = 5
-        itr = 1 
+        itr = 1
         date_time = datetime.now()
         for i in range(count):
             Shopcart(id=itr,user_id=(itr+1),create_time=date_time, update_time=date_time).create()
@@ -171,7 +174,12 @@ class TestShopcarts(unittest.TestCase):
         shopcarts_queried = Shopcart.all()
         self.assertEqual(len(shopcarts_queried),count)
 
-        
+    def test_find_by_user(self):
+        """ Find a Shopcart by user """
+        Shopcart(user_id="101").create()
+        Shopcart(user_id="201").create()
+        shopcarts = Shopcart.find_by_user(101)
+        self.assertEqual(shopcarts[0].user_id, 101)
 
 class TestShopcartItems(unittest.TestCase):
     """ Test Cases for ShopcartItems """
@@ -341,9 +349,44 @@ class TestShopcartItems(unittest.TestCase):
         shopcart_item = ShopcartItem()
         self.assertRaises(DataValidationError, shopcart_item.deserialize, data)
 
+    def test_find_by_sku(self):
+        """ Find Shopcart Items by sku """
+        ShopcartItem(sid=202, sku=101, name="printer", price=101.29, amount=1).create()
+        ShopcartItem(sid=203, sku=101, name="printer", price=101.29, amount=10).create()
+        ShopcartItem(sid=202, sku=201, name="printer", price=101.29, amount=1).create()
+        shopcart_items = ShopcartItem.find_by_sku(101)
+        self.assertEqual(len(shopcart_items),2)
+        self.assertEqual(shopcart_items[0].sku, 101)
+
+    def test_find_by_name(self):
+        """ Find Shopcart Items by name """
+        ShopcartItem(sid=202, sku=101, name="printer", price=101.29, amount=1).create()
+        ShopcartItem(sid=202, sku=201, name="laptop", price=101.29, amount=1).create()
+        shopcart_items = ShopcartItem.find_by_name("printer")
+        self.assertEqual(len(shopcart_items),1)
+        self.assertEqual(shopcart_items[0].name, "printer")
+
+    def test_find_by_price(self):
+        """ Find Shopcart Items by price """
+        ShopcartItem(sid=202, sku=101, name="printer", price=101.29, amount=1).create()
+        ShopcartItem(sid=202, sku=201, name="printer", price=99.99, amount=1).create()
+        shopcart_items = ShopcartItem.find_by_price(99.99)
+        self.assertEqual(len(shopcart_items),1)
+        self.assertEqual(shopcart_items[0].price, 99.99)
+
+    def test_find_by_amount(self):
+        """ Find Shopcart Items by amount """
+        ShopcartItem(sid=202, sku=101, name="printer", price=101.29, amount=1).create()
+        ShopcartItem(sid=202, sku=201, name="printer", price=101.29, amount=10).create()
+        shopcart_items = ShopcartItem.find_by_amount(10)
+        self.assertEqual(len(shopcart_items),1)
+        self.assertEqual(shopcart_items[0].amount, 10)
+
     def test_find_by_shopcart_id(self):
+        """ Find Shopcart Items by Shopcart id for Shopcart with single item """
         data = {"id":1,"sid":10,"sku":150,"name":"test obj1","price":100, "amount":1}
-        ShopcartItem(id=data["id"],sid=data["sid"],sku=data["sku"],name=data["name"],price = data["price"], amount = data["amount"]).create()
+        ShopcartItem(id=data["id"],sid=data["sid"],sku=data["sku"],name=data["name"],
+                     price = data["price"], amount = data["amount"]).create()
         item_queried = ShopcartItem.find_by_shopcartid(data["sid"])[0]
         self.assertEqual(item_queried.id, data["id"])
         self.assertEqual(item_queried.sid, data["sid"])
@@ -351,14 +394,16 @@ class TestShopcartItems(unittest.TestCase):
         self.assertEqual(item_queried.name, data["name"])
         self.assertEqual(item_queried.price, data["price"])
         self.assertEqual(item_queried.amount, data["amount"])
-    
+
     def test_find_by_shopcart_id_multiple(self):
+        """ Find Shopcart Items by Shopcart id for Shopcart with multiple items """
         ShopcartItem(id=1,sid=2,sku=3,name="obj 1",price = 4, amount =5).create()
         ShopcartItem(id=6,sid=2,sku=7,name="obj 2",price = 8, amount =9).create()
         items_queried = ShopcartItem.find_by_shopcartid(2)
         self.assertEqual(len(items_queried),2)
 
     def test_find_by_shopcart_id_with_no_items(self):
+        """ Find Shopcart Items by empty Shopcart """
         item_queried = ShopcartItem.find_by_shopcartid(10)
         self.assertEqual(len(item_queried),0)
 

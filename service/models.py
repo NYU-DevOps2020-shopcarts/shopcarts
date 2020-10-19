@@ -161,16 +161,28 @@ class Shopcart(db.Model):
 
     @classmethod
     def all(cls):
-        """ Returns all of the Pets in the database """
-        cls.logger.info("Processing all Pets")
+        """ Returns all of the Shopcarts in the database """
+        cls.logger.info("Processing all Shopcarts")
         return cls.query.all()
-    
+
     @classmethod
     def find(cls, id):
         """ Finds a items in a shopcart based on the shopcart id provided """
         cls.logger.info("Processing lookup for shopcart id %s ...", id)
         return cls.query.get(id)
 
+
+    @classmethod
+    def find_by_user(cls, user_id : int):
+        """ Returns shopcart for a user
+            :param user_id: the id of the user to find the shopcart for
+            :type user_id: int
+
+            :return: a shopcart with that user id, or 404_NOT_FOUND if not found
+            :rtype: Shopcart
+        """
+        cls.logger.info("Processing user id query for %s ...", user_id)
+        return cls.query.filter(cls.user_id == user_id)
 
 
 class ShopcartItem(db.Model):
@@ -280,7 +292,6 @@ class ShopcartItem(db.Model):
                 "Invalid shopcart item: body of request contained bad or no data"
             )
         return self
-    
 
     @classmethod
     def init_db(cls, app):
@@ -295,10 +306,64 @@ class ShopcartItem(db.Model):
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
 
+    @classmethod
+    def all(cls):
+        """ Returns all of the Shopcart Items in the database """
+        cls.logger.info("Processing all Shopcart Items")
+        return cls.query.all()
+
+    @classmethod
+    def find_by_sku(cls, sku : int):
+        """ Returns all shopcart items by sku
+            :param sku: the sku to find the shopcart items for
+            :type sku: int
+
+            :return: a list of shopcart items with that sku, or 404_NOT_FOUND if not found
+            :rtype: list
+        """
+        cls.logger.info("Processing sku query for %s ...", sku)
+        return cls.query.filter(cls.sku == sku).all()
+
+    @classmethod
+    def find_by_name(cls, name : str):
+        """ Returns all shopcart items by product name
+            :param name: the name of the product to find shopcart items for
+            :type sku: string
+
+            :return: a list of shopcart items with that product, or 404_NOT_FOUND if not found
+            :rtype: list
+        """
+        cls.logger.info("Processing name query for %s ...", name)
+        return cls.query.filter(cls.name == name).all()
+
+    @classmethod
+    def find_by_price(cls, price : float):
+        """ Returns all shopcart items by product price
+            :param sku: the price to find the shopcart items for
+            :type sku: float
+
+            :return: a list of shopcart items with that products with that price,
+            or 404_NOT_FOUND if not found
+            :rtype: list
+        """
+        cls.logger.info("Processing price query for %s ...", price)
+        return cls.query.filter(cls.price == price).all()
+
+    @classmethod
+    def find_by_amount(cls, amount : int):
+        """ Returns all shopcart items by amount of a product
+            :param sku: the amount to find the shopcart items for
+            :type sku: int
+
+            :return: a list of shopcart items with that product amount,
+            or 404_NOT_FOUND if not found
+            :rtype: list
+        """
+        cls.logger.info("Processing sku amount for %s ...", amount)
+        return cls.query.filter(cls.amount == amount).all()
 
     @classmethod
     def find_by_shopcartid(cls, id):
         """ Finds a items in a shopcart based on the shopcart id provided """
         cls.logger.info("Processing lookup or 404 for id %s ...", id)
         return cls.query.filter_by(sid = id).all()
-
