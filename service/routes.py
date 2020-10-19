@@ -28,10 +28,13 @@ import logging
 from flask import jsonify, request, json, url_for, make_response, abort
 from flask_api import status  # HTTP Status Codes
 from werkzeug.exceptions import NotFound
+import json
+
 
 from .models import Shopcart, ShopcartItem, DataValidationError
 
-from . import app
+from . import app, constants
+
 
 ######################################################################
 # Error Handlers
@@ -60,7 +63,7 @@ def not_found(error):
     app.logger.warning(str(error))
     return (
         jsonify(
-            status=status.HTTP_404_NOT_FOUND, error="Not Found", message=str(error)
+            status=status.HTTP_404_NOT_FOUND, error=constants.NOT_FOUND, message=str(error)
         ),
         status.HTTP_404_NOT_FOUND,
     )
@@ -150,6 +153,54 @@ def create_shopcarts():
     )
 
 ######################################################################
+# G E T  S H O P C A R T
+######################################################################
+@app.route("/shopcarts/<shopcart_id>", methods=["GET"])
+def get_shopcart(shopcart_id):
+    """
+    Gets information about a Shopcart
+    This endpoint will get information about a shopcart
+    """
+    app.logger.info("Request to get information of a shopcart")
+    
+    shopcart = Shopcart.find(shopcart_id)
+    if shopcart is None:
+        return not_found("Shopcart not found")
+        
+    shopcart_items =  ShopcartItem.find_by_shopcartid(shopcart_id)
+    response = shopcart.serialize()
+    response["items"] = [item.serialize() for item in shopcart_items]
+
+    app.logger.info("Shopcart with ID [%s] fetched.", shopcart.id)
+    return make_response(
+        jsonify(response), status.HTTP_200_OK
+    )
+
+######################################################################
+# G E T  S H O P C A R T  D E T A I L S 
+######################################################################
+@app.route("/shopcartitems/<shopcart_id>", methods=["GET"])
+def get_shopcart_items(shopcart_id):
+    """
+    Get information of a shopcart
+    This endpoint will return items in the shop cart 
+    """
+    app.logger.info("Request to get items in a shopcart")
+
+    shopcart_items =  ShopcartItem.find_by_shopcartid(shopcart_id)
+    
+
+    if shopcart_items is None or len(shopcart_items)==0:
+        app.logger.info("Shopcart with ID [%s] is empty.", shopcart_id)
+        return not_found("Not found")
+
+    result = [item.serialize() for item in shopcart_items]
+    app.logger.info("Fetched items for Shopcart with ID [%s].", shopcart_id)
+    return make_response(
+        jsonify(result), status.HTTP_200_OK
+    )
+
+######################################################################
 # ADD A NEW SHOPCARTITEM
 ######################################################################
 @app.route("/shopcartitems", methods=["POST"])
@@ -167,6 +218,7 @@ def create_shopcart_items():
     message = shopcart_item.serialize()
     #TODO: location_url = url_for("get_shopcart_items", 
     #                              shopcart_item_id=shopcart_item.id, _external=True)
+
     location_url = request.base_url + 'shopcartitems'
 
     app.logger.info("ShopcartItem with ID [%s] created.", shopcart_item.id)

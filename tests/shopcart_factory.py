@@ -32,8 +32,10 @@ class ShopcartItemFactory(factory.Factory):
     price = FuzzyChoice(choices=[2.39, 5.99, 20.99, 45.99, 99.98, 100.00, 205.36])
     amount = FuzzyChoice(choices=[1, 2, 3, 5, 10])
     #create time fields in db
-    #create_time = datetime.isoformat(datetime.now())
-    #update_time = datetime.isoformat(datetime.now())
+    create_time = datetime.isoformat(datetime.now())
+    update_time = datetime.isoformat(datetime.now())
+
+
 
 
 if __name__ == "__main__":

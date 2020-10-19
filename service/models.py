@@ -164,6 +164,13 @@ class Shopcart(db.Model):
         """ Returns all of the Pets in the database """
         cls.logger.info("Processing all Pets")
         return cls.query.all()
+    
+    @classmethod
+    def find(cls, id):
+        """ Finds a items in a shopcart based on the shopcart id provided """
+        cls.logger.info("Processing lookup for shopcart id %s ...", id)
+        return cls.query.get(id)
+
 
 
 class ShopcartItem(db.Model):
@@ -273,6 +280,7 @@ class ShopcartItem(db.Model):
                 "Invalid shopcart item: body of request contained bad or no data"
             )
         return self
+    
 
     @classmethod
     def init_db(cls, app):
@@ -286,3 +294,11 @@ class ShopcartItem(db.Model):
         db.init_app(app)
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
+
+
+    @classmethod
+    def find_by_shopcartid(cls, id):
+        """ Finds a items in a shopcart based on the shopcart id provided """
+        cls.logger.info("Processing lookup or 404 for id %s ...", id)
+        return cls.query.filter_by(sid = id).all()
+

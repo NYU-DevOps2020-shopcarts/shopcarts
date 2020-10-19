@@ -118,6 +118,53 @@ A shopcart item can be created with a `POST` request on `/shopcartitems'`  with 
     
     }
 
+## Getting the items in a shopcart
+To get the list of items in a shopcart, you can hit a `GET` request with the id of the shopcart you are looking for. 
+
+``` curl --location --request GET 'http://0.0.0.0:5000/shopcartitems/10' ```
+
+The response will be something like this if
+1. There are items in the shopcart - status code 200
+```json [
+    {
+        "amount": 1,
+        "create_time": "2020-10-18T17:21:44.626229",
+        "id": 1,
+        "name": "hello",
+        "price": 100.0,
+        "sid": 10,
+        "sku": 10,
+        "update_time": "2020-10-18T17:21:44.626229"
+    },
+    {
+        "amount": 1,
+        "create_time": "2020-10-18T17:22:06.844597",
+        "id": 2,
+        "name": "hello2",
+        "price": 100.0,
+        "sid": 10,
+        "sku": 20,
+        "update_time": "2020-10-18T17:22:06.844597"
+    },
+    {
+        "amount": 1,
+        "create_time": "2020-10-18T17:22:14.123710",
+        "id": 3,
+        "name": "hello3",
+        "price": 100.0,
+        "sid": 10,
+        "sku": 30,
+        "update_time": "2020-10-18T17:22:14.123710"
+    }
+]
+```
+
+2. If the shopcart is empty or shopcart is not found 
+   status code 404
+```json 
+{}
+```
+
 ## Getting Shopcart list
 A shopcart list can be got with a `GET` request on `'/shopcarts'`. The response will be something like 
 
