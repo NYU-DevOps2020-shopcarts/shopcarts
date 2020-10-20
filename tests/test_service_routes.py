@@ -198,16 +198,13 @@ class TestShopcartServer(TestCase):
 
     def test_get_shopcart_with_items(self):
         """ Find a Shopcart by id that has multiple items"""
-        shopcart_id = 1
         test_shopcart = ShopcartFactory()
-        resp = self.app.post(
-            "/shopcarts", json={"id":shopcart_id,"user_id": test_shopcart.user_id},
-            content_type="application/json"
-        )
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         count = 5
-        shopcart_items = self._create_shopcart_items(count,shopcart_id)
-        get_items_response = self.app.get("/shopcarts/"+str(shopcart_id))
+        shopcart_id = resp.json["id"]
+        shopcart_items = self._create_shopcart_items(count, shopcart_id)
+        get_items_response = self.app.get("/shopcarts/" + str(shopcart_id))
         self.assertEqual(get_items_response.status_code, status.HTTP_200_OK)
         response = get_items_response.get_json()
         self.assertEqual(response["id"],shopcart_id)
@@ -273,7 +270,11 @@ class TestShopcartServer(TestCase):
 
     def test_create_shopcart_item(self):
         """ Create a new ShopcartItem """
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(), content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         test_shopcart_item = ShopcartItemFactory()
+        test_shopcart_item.sid = resp.json["id"]
         resp = self.app.post(
             "/shopcartitems", json=test_shopcart_item.serialize(), content_type="application/json"
         )
@@ -333,7 +334,11 @@ class TestShopcartServer(TestCase):
 
     def test_query_shopcart_item_list_by_sku(self):
         """ Query shopcart item list by sku """
-        shopcart_items = self._create_shopcart_items(10)
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        shopcart_id = resp.json["id"]
+        shopcart_items = self._create_shopcart_items(10, shopcart_id)
         test_sku = shopcart_items[0].sku
         sku_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.sku == test_sku]
@@ -347,7 +352,11 @@ class TestShopcartServer(TestCase):
 
     def test_query_shopcart_item_list_by_name(self):
         """ Query shopcart item list by name """
-        shopcart_items = self._create_shopcart_items(10)
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        shopcart_id = resp.json["id"]
+        shopcart_items = self._create_shopcart_items(10, shopcart_id)
         test_name = shopcart_items[0].name
         name_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.name == test_name]
@@ -361,7 +370,11 @@ class TestShopcartServer(TestCase):
 
     def test_query_shopcart_item_list_by_price(self):
         """ Query shopcart item list by price """
-        shopcart_items = self._create_shopcart_items(10)
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        shopcart_id = resp.json["id"]
+        shopcart_items = self._create_shopcart_items(10, shopcart_id)
         test_price = shopcart_items[0].price
         price_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.price == test_price]
@@ -375,7 +388,11 @@ class TestShopcartServer(TestCase):
 
     def test_query_shopcart_item_list_by_amount(self):
         """ Query shopcart item list by amount """
-        shopcart_items = self._create_shopcart_items(10)
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        shopcart_id = resp.json["id"]
+        shopcart_items = self._create_shopcart_items(10, shopcart_id)
         test_amount = shopcart_items[0].amount
         amount_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.amount == test_amount]

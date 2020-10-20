@@ -167,7 +167,7 @@ class Shopcart(db.Model):
 
     @classmethod
     def find(cls, id):
-        """ Finds a items in a shopcart based on the shopcart id provided """
+        """ Finds a shopcart based on the id provided """
         cls.logger.info("Processing lookup for shopcart id %s ...", id)
         return cls.query.get(id)
 
@@ -218,6 +218,9 @@ class ShopcartItem(db.Model):
         """
         Creates a ShopcartItem to the database
         """
+        shopcart = Shopcart().find(self.sid)
+        if shopcart is None:
+            raise DataValidationError("Invalid shopcart id: shopcart doesn't exist")
         date_time = datetime.now()
         self.id = None  # id must be none to generate next primary key
         self.create_time = date_time
