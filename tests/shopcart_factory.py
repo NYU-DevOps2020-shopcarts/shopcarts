@@ -11,6 +11,7 @@ class ShopcartFactory(factory.Factory):
     """ Creates fake shopcarts """
 
     class Meta:
+        """ Creates fake shopcarts """
         model = Shopcart
 
     id = factory.Sequence(lambda n: n)
@@ -23,6 +24,7 @@ class ShopcartItemFactory(factory.Factory):
     """ Creates fake shopcart items """
 
     class Meta:
+        """ Creates fake shopcart items """
         model = ShopcartItem
 
     id = factory.Sequence(lambda n: n)

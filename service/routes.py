@@ -26,7 +26,7 @@ GET /shopcarts - Returns a list all of the Shopcarts
 
 import sys
 import logging
-from flask import jsonify, request, make_response, abort
+from flask import jsonify, request, url_for, make_response, abort
 from flask_api import status  # HTTP Status Codes
 from flask.logging import create_logger
 from werkzeug.exceptions import NotFound
@@ -149,8 +149,7 @@ def create_shopcarts():
     shopcart.deserialize(request.get_json())
     shopcart.create()
     message = shopcart.serialize()
-    #TODO: location_url = url_for("get_shopcarts", shopcart_id=shopcart.id, _external=True)
-    location_url = request.base_url + 'shopcarts'
+    location_url = url_for("get_shopcart", shopcart_id=shopcart.id, _external=True)
 
     logger.info("Shopcart with ID [%s] created.", shopcart.id)
     return make_response(
@@ -205,6 +204,29 @@ def get_shopcart_items(shopcart_id):
     )
 
 ######################################################################
+# G E T  S H O P C A R T  I T E M
+######################################################################
+@app.route("/shopcartitem/<shopcart_item_id>", methods=["GET"])
+def get_shopcart_item(shopcart_item_id):
+    """
+    Get a shopcart item
+    This endpoint will return an item in the shop cart
+    """
+    logger.info("Request to get an item in a shopcart")
+
+    shopcart_item =  ShopcartItem.find(shopcart_item_id)
+
+    if shopcart_item is None:
+        logger.info("Shopcart item with ID [%s] not found.", shopcart_item_id)
+        return not_found("Not found")
+
+    result = shopcart_item.serialize()
+    logger.info("Fetched shopcart item with ID [%s].", shopcart_item_id)
+    return make_response(
+        jsonify(result), status.HTTP_200_OK
+    )
+
+######################################################################
 # ADD A NEW SHOPCARTITEM
 ######################################################################
 @app.route("/shopcartitems", methods=["POST"])
@@ -220,11 +242,8 @@ def create_shopcart_items():
     shopcart_item.deserialize(request.get_json())
     shopcart_item.create()
     message = shopcart_item.serialize()
-    #TODO: location_url = url_for("get_shopcart_items",
-    #                              shopcart_item_id=shopcart_item.id, _external=True)
-
-    location_url = request.base_url + 'shopcartitems'
-
+    location_url = url_for("get_shopcart_item",
+                            shopcart_item_id=shopcart_item.id, _external=True)
     logger.info("ShopcartItem with ID [%s] created.", shopcart_item.id)
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}

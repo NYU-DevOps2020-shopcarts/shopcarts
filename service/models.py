@@ -397,6 +397,6 @@ class ShopcartItem(db.Model):
 
     @classmethod
     def find(cls, id):
-        """ Finds a items in a shopcart based on the shopcart item id provided """
+        """ Finds a shopcart item based on the id provided """
         cls.logger.info("Processing lookup for shopcart item id %s ...", id)
         return cls.query.get(id)

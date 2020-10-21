@@ -23,9 +23,7 @@ nosetests --stop tests/test_service.py:TestPetServer
 import os
 import unittest
 from unittest import TestCase
-import logging
 from flask_api import status  # HTTP Status Codes
-from werkzeug.datastructures import MultiDict, ImmutableMultiDict
 from shopcart_factory import ShopcartFactory, ShopcartItemFactory
 from service.models import Shopcart, ShopcartItem, DataValidationError, db
 from service import routes
@@ -102,7 +100,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         # Make sure location header is set
         location = resp.headers.get("Location", None)
-        self.assertTrue(location != None)
+        self.assertTrue(location is not None)
         # Check the data is correct
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
@@ -111,19 +109,19 @@ class TestShopcartServer(TestCase):
                         "Creation time not set")
         self.assertIsNotNone(new_shopcart["update_time"],
                         "Update time not set")
-        #TODO after Get Added
+
         # Check that the location header was correct
-        #resp = self.app.get(location, content_type="application/json")
-        #self.assertEqual(resp.status_code, HTTP_200_OK)
-        #new_shopcart = resp.get_json()
-        #self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
+        resp = self.app.get(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_shopcart = resp.get_json()
+        self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
         #times set by db
-        #self.assertIsNotNone(
-        #    new_shopcart["create_time"], "Creation time not set"
-        #)
-        #self.assertIsNotNone(
-        #    new_shopcart["update_time"], "Update time not set"
-        #)
+        self.assertIsNotNone(
+            new_shopcart["create_time"], "Creation time not set"
+        )
+        self.assertIsNotNone(
+            new_shopcart["update_time"], "Update time not set"
+        )
 
     def test_create_shopcart_with_pure_json(self):
         """ Create a new Shopcart with pure JSON """
@@ -134,7 +132,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         # Make sure location header is set
         location = resp.headers.get("Location", None)
-        self.assertTrue(location != None)
+        self.assertTrue(location is not None)
         # Check the data is correct
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
@@ -143,19 +141,20 @@ class TestShopcartServer(TestCase):
                              "Creation time not set")
         self.assertIsNotNone(new_shopcart["update_time"],
                              "Update time not set")
-        #TODO after Get Added
+
         # Check that the location header was correct
-        #resp = self.app.get(location, content_type="application/json")
-        #self.assertEqual(resp.status_code, HTTP_200_OK)
-        #new_shopcart = resp.get_json()
-        #self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
+        resp = self.app.get(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_shopcart = resp.get_json()
+        self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
         #times set by db
-        #self.assertIsNotNone(
-        #    new_shopcart["create_time"], "Creation time not set"
-        #)
-        #self.assertIsNotNone(
-        #    new_shopcart["update_time"], "Update time not set"
-        #)
+        self.assertIsNotNone(
+            new_shopcart["create_time"], "Creation time not set"
+        )
+        self.assertIsNotNone(
+            new_shopcart["update_time"], "Update time not set"
+        )
+
     def test_non_existing_shopcart(self):
         """ Find a Shopcart by id that doesn't exist """
         shopcart_id = 1
@@ -199,7 +198,8 @@ class TestShopcartServer(TestCase):
     def test_get_shopcart_with_items(self):
         """ Find a Shopcart by id that has multiple items"""
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+                             content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         count = 5
         shopcart_id = resp.json["id"]
@@ -292,7 +292,8 @@ class TestShopcartServer(TestCase):
     def test_create_shopcart_item(self):
         """ Create a new ShopcartItem """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(), content_type="application/json")
+        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
+                             content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         test_shopcart_item = ShopcartItemFactory()
         test_shopcart_item.sid = resp.json["id"]
@@ -326,32 +327,32 @@ class TestShopcartServer(TestCase):
         self.assertIsNotNone(
             new_shopcart_item["update_time"], "Update time not set"
         )
-        #TODO after Get functionality added
+
         # Check that the location header was correct
-        #resp = self.app.get(location, content_type="application/json")
-        #self.assertEqual(resp.status_code, HTTP_200_OK)
-        #new_shopcart_item = resp.get_json()
-        #self.assertEqual(new_shopcart_item["sid"], test_shopcart_item.sid,
-        #                 "Shopcart ids do not match")
-        #self.assertEqual(
-        #    new_shopcart_item["sku"], test_shopcart_item.sku, "SKUs do not match"
-        #)
-        #self.assertEqual(
-        #    new_shopcart_item["name"], test_shopcart_item.name, "Product names do not match"
-        #)
-        #self.assertEqual(
-        #    new_shopcart_item["price"], test_shopcart_item.price, "Prices do not match"
-        #)
-        #self.assertEqual(
-        #    new_shopcart_item["amount"], test_shopcart_item.amount, "Amounts do not match"
-        #)
+        resp = self.app.get(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_shopcart_item = resp.get_json()
+        self.assertEqual(new_shopcart_item["sid"], test_shopcart_item.sid,
+                         "Shopcart ids do not match")
+        self.assertEqual(
+            new_shopcart_item["sku"], test_shopcart_item.sku, "SKUs do not match"
+        )
+        self.assertEqual(
+            new_shopcart_item["name"], test_shopcart_item.name, "Product names do not match"
+        )
+        self.assertEqual(
+            new_shopcart_item["price"], test_shopcart_item.price, "Prices do not match"
+        )
+        self.assertEqual(
+            new_shopcart_item["amount"], test_shopcart_item.amount, "Amounts do not match"
+        )
         #times set by db
-        #self.assertIsNotNone(
-        #    new_shopcart_item["create_time"], "Creation time not set"
-        #)
-        #self.assertIsNotNone(
-        #    new_shopcart_item["update_time"], "Update time not set"
-        #)
+        self.assertIsNotNone(
+            new_shopcart_item["create_time"], "Creation time not set"
+        )
+        self.assertIsNotNone(
+            new_shopcart_item["update_time"], "Update time not set"
+        )
 
     def test_update_shopcart_item(self):
         """ Update an existing shopcart item """
@@ -388,7 +389,8 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item_list_by_sku(self):
         """ Query shopcart item list by sku """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+                             content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
         shopcart_items = self._create_shopcart_items(10, shopcart_id)
@@ -406,7 +408,8 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item_list_by_name(self):
         """ Query shopcart item list by name """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+                             content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
         shopcart_items = self._create_shopcart_items(10, shopcart_id)
@@ -424,7 +427,8 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item_list_by_price(self):
         """ Query shopcart item list by price """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+                             content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
         shopcart_items = self._create_shopcart_items(10, shopcart_id)
@@ -442,7 +446,8 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item_list_by_amount(self):
         """ Query shopcart item list by amount """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json")
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+                             content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
         shopcart_items = self._create_shopcart_items(10, shopcart_id)

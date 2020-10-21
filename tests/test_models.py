@@ -56,7 +56,7 @@ class TestShopcarts(unittest.TestCase):
         """ Create a shopcart and assert that it exists """
         date_time = datetime.now()
         shopcart = Shopcart(user_id=101, create_time=date_time, update_time=date_time)
-        self.assertTrue(shopcart != None)
+        self.assertTrue(shopcart is not None)
         self.assertEqual(shopcart.id, None)
         self.assertEqual(shopcart.user_id, 101)
         self.assertEqual(shopcart.create_time, date_time)
@@ -67,7 +67,7 @@ class TestShopcarts(unittest.TestCase):
         shopcarts = Shopcart.all()
         self.assertEqual(shopcarts, [])
         shopcart = Shopcart(user_id=12345)
-        self.assertTrue(shopcart != None)
+        self.assertTrue(shopcart is not None)
         self.assertEqual(shopcart.id, None)
         shopcart.create()
         self.assertEqual(shopcart.id, 1)
@@ -248,7 +248,7 @@ class TestShopcartItems(unittest.TestCase):
         date_time = datetime.now()
         shopcart_item = ShopcartItem(sid=100, sku=5000, name="soap", price=2.23,
                                     amount=3, create_time=date_time, update_time=date_time)
-        self.assertTrue(shopcart_item != None)
+        self.assertTrue(shopcart_item is not None)
         self.assertEqual(shopcart_item.id, None)
         self.assertEqual(shopcart_item.sid, 100)
         self.assertEqual(shopcart_item.sku, 5000)
@@ -263,7 +263,7 @@ class TestShopcartItems(unittest.TestCase):
         shopcarts = Shopcart.all()
         self.assertEqual(shopcarts, [])
         shopcart = Shopcart(user_id=12345)
-        self.assertTrue(shopcart != None)
+        self.assertTrue(shopcart is not None)
         self.assertEqual(shopcart.id, None)
         shopcart.create()
         self.assertEqual(shopcart.id, 1)
@@ -272,7 +272,7 @@ class TestShopcartItems(unittest.TestCase):
         self.assertRaises(DataValidationError,shopcart_item.create)
         shopcart_item = ShopcartItem(sid=1, sku=5000, name="soap", price=2.23,
                                      amount=3)
-        self.assertTrue(shopcart_item != None)
+        self.assertTrue(shopcart_item is not None)
         self.assertEqual(shopcart_item.id, None)
         self.assertEqual(shopcart_item.sid, 1)
         self.assertEqual(shopcart_item.sku, 5000)
@@ -492,9 +492,10 @@ class TestShopcartItems(unittest.TestCase):
         """ Find Shopcart Items by Shopcart id for Shopcart with single item """
         shopcart=Shopcart().deserialize({"user_id":12345})
         shopcart.create()
-        data = {"id": 1, "sid": shopcart.id, "sku": 150, "name": "test obj1", "price": 100, "amount": 1}
-        ShopcartItem(id=data["id"], sid=data["sid"], sku=data["sku"], name=data["name"], price=data["price"],
-                     amount=data["amount"]).create()
+        data = {"id": 1, "sid": shopcart.id, "sku": 150,
+                "name": "test obj1", "price": 100, "amount": 1}
+        ShopcartItem(id=data["id"], sid=data["sid"], sku=data["sku"], name=data["name"],
+                     price=data["price"], amount=data["amount"]).create()
         item_queried = ShopcartItem.find_by_shopcartid(data["sid"])[0]
         self.assertEqual(item_queried.id, data["id"])
         self.assertEqual(item_queried.sid, data["sid"])

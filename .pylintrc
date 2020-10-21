@@ -1,3 +1,6 @@
 [MASTER]
 
 load-plugins=pylint_flask, pylint_flask_sqlalchemy
+
+[MESSAGES CONTROL]
+disable=E1101
