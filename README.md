@@ -37,21 +37,16 @@ honcho start
 ### ShopcartItem - Contains product information for an item in a shopcart
 #### Attributes:
 -----------
-id (int) - for index purpose
-
-sid (int) - shop cart id
-
-sku (int) - product id
-
-name (string) - product name
-
-price (float) - price for one
-
-amount (int) - number of product
-
-create_time (DateTime) - the time this product was created
-
-update_time (DateTime) - the time this product was updated
+| Name        | Type     | Purpose                                              |
+|-------------|----------|------------------------------------------------------|
+| id          | int      | Primary key for the table                            |
+| sid         | int      | Shopcart id in which the item is present             |
+| sku         | int      | Product/Item id                                      |
+| name        | string   | Name of product/item                                 |
+| price       | float    | Price of the product/item                            |
+| amount      | int      | Count of the item in the shopcart                    |
+| create_time | datetime | Time when item was added to the shopcart             |
+| update_time | datetime | Time when the item in the shopcart was last modified |
 
 ## Manually running the Tests
 
@@ -80,6 +75,18 @@ You can also manually run `nosetests` with `coverage` (but `setup.cfg` does this
 ## Logging Services
 
 Logging is set up to track events.
+
+## Routes
+| URL                              | HTTP method | Description                   |
+|----------------------------------|-------------|-------------------------------|
+| /shopcarts                       | GET         | Get a shopcart list           |
+| /shopcarts                       | POST        | Create a shopcart             |
+| /shopcarts                       | DELETE      | Delete a shopcart             |
+| /shopcartitems/<sid>             | GET         | Get item list from a shopcart |
+| /shopcartitems/<sid>             | POST        | Create a shopcart item        |
+| /shopcartitems/<sid>             | PUT         | Update a shopcart item        |
+| /shopcarts/<sid>/items/<item_id> | DELETE      | Delete a shopcart item        |
+| /shopcarts/<sid>/place-order     | PUT         | Place an order                |
 
 ## Creating a Shopcart or Shopcart Item
 A shopcart can be created with a `POST` request on `'/shopcarts'` with, for example, the required conent including the following parameters:
