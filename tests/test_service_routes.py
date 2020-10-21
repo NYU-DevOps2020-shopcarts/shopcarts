@@ -23,6 +23,7 @@ nosetests --stop tests/test_service.py:TestPetServer
 import os
 import unittest
 from unittest import TestCase
+from unittest.mock import patch
 from flask_api import status  # HTTP Status Codes
 from shopcart_factory import ShopcartFactory, ShopcartItemFactory
 from service.models import Shopcart, ShopcartItem, DataValidationError, db
@@ -303,7 +304,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         # Make sure location header is set
         location = resp.headers.get("Location", None)
-        self.assertTrue(location != None)
+        self.assertTrue(location is not None)
         # Check the data is correct
         new_shopcart_item = resp.get_json()
         self.assertEqual(new_shopcart_item["sid"],
@@ -357,7 +358,8 @@ class TestShopcartServer(TestCase):
     def test_update_shopcart_item(self):
         """ Update an existing shopcart item """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(), content_type="application/json")
+        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
+                             content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
         # create a shopcart item to update
@@ -494,12 +496,33 @@ class TestShopcartServer(TestCase):
         self.assertEqual(len(ShopcartItem.all()), 1)
 
         resp = self.app.delete(
-            "/shopcarts/{}/items/{}".format(shopcart_id, shopcart_item.id), content_type="application/json"
+            "/shopcarts/{}/items/{}".format(shopcart_id, shopcart_item.id),
+            content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(resp.data), 0)
 
         self.assertEqual(len(ShopcartItem.all()), 0)
+
+######################################################################
+#  ERROR HANDLER TEST CASES
+######################################################################
+    @patch('service.routes.Shopcart.create')
+    def test_request_validation_error(self, bad_request_mock):
+        """ Test a Data Validation error """
+        bad_request_mock.side_effect = DataValidationError()
+        test_shopcart = Shopcart()
+        resp = self.app.post(
+            "/shopcarts", json=test_shopcart.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_method_not_allowed(self):
+        """ Test method not allowed """
+        resp = self.app.post("/shopcarts/update")
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertIn(b'Method not Allowed', resp.data)
+
 
 ######################################################################
 #   M A I N
