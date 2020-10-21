@@ -1,6 +1,7 @@
 # shopcarts
 
-![](https://travis-ci.org/NYU-DevOps2020-shopcarts/shopcarts.svg?branch=master)
+[![Build Status](https://travis-ci.com/NYU-DevOps2020-shopcarts/shopcarts.svg?branch=master)](https://travis-ci.com/NYU-DevOps2020-shopcarts/shopcarts)
+[![codecov](https://codecov.io/gh/NYU-DevOps2020-shopcarts/shopcarts/branch/master/graph/badge.svg?token=R1VMI8JR4X)](https://codecov.io/gh/NYU-DevOps2020-shopcarts/shopcarts)
 
 The shopcarts resource allows customers to make a collection of products that they want to purchase
 

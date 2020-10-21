@@ -151,11 +151,11 @@ class Shopcart(db.Model):
 
             self.user_id = data["user_id"]
         except KeyError as error:
-            raise DataValidationError("Invalid shopcart: missing " + error.args[0])
+            raise DataValidationError("Invalid shopcart: missing " + error.args[0]) from error
         except TypeError as error:
             raise DataValidationError(
                 "Invalid shopcart: body of request contained bad or no data"
-            )
+            ) from error
         return self
 
     @classmethod
@@ -178,10 +178,10 @@ class Shopcart(db.Model):
         return cls.query.all()
 
     @classmethod
-    def find(cls, id):
+    def find(cls, sid):
         """ Finds a shopcart based on the id provided """
-        cls.logger.info("Processing lookup for shopcart id %s ...", id)
-        return cls.query.get(id)
+        cls.logger.info("Processing lookup for shopcart id %s ...", sid)
+        return cls.query.get(sid)
 
     @classmethod
     def find_by_user(cls, user_id : int):
@@ -246,7 +246,7 @@ class ShopcartItem(db.Model):
         if not self.id:
             raise DataValidationError("Update called with empty ID field")
         db.session.commit()
-  
+
     def delete(self):
         """Removes a ShopcartItem from the data store"""
         db.session.delete(self)
@@ -313,11 +313,13 @@ class ShopcartItem(db.Model):
             self.price = data["price"]
             self.amount = data["amount"]
         except KeyError as error:
-            raise DataValidationError("Invalid shopcart item: missing " + error.args[0])
+            raise DataValidationError(
+                "Invalid shopcart item: missing " + error.args[0]
+            ) from error
         except TypeError as error:
             raise DataValidationError(
                 "Invalid shopcart item: body of request contained bad or no data"
-            )
+            ) from error
         return self
 
     @classmethod
@@ -390,13 +392,13 @@ class ShopcartItem(db.Model):
         return cls.query.filter(cls.amount == amount).all()
 
     @classmethod
-    def find_by_shopcartid(cls, id):
+    def find_by_shopcartid(cls, sid):
         """ Finds a items in a shopcart based on the shopcart id provided """
-        cls.logger.info("Processing lookup or 404 for id %s ...", id)
-        return cls.query.filter_by(sid = id).all()
+        cls.logger.info("Processing lookup or 404 for id %s ...", sid)
+        return cls.query.filter_by(sid=sid).all()
 
     @classmethod
-    def find(cls, id):
-        """ Finds a shopcart item based on the id provided """
-        cls.logger.info("Processing lookup for shopcart item id %s ...", id)
-        return cls.query.get(id)
+    def find(cls, item_id):
+        """ Finds a items in a shopcart based on the shopcart item id provided """
+        cls.logger.info("Processing lookup for shopcart item id %s ...", item_id)
+        return cls.query.get(item_id)

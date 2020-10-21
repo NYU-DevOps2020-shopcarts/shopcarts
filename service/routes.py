@@ -27,8 +27,8 @@ GET /shopcarts - Returns a list all of the Shopcarts
 import sys
 import logging
 from flask import jsonify, request, url_for, make_response, abort
-from flask_api import status  # HTTP Status Codes
 from flask.logging import create_logger
+from flask_api import status  # HTTP Status Codes
 from werkzeug.exceptions import NotFound
 
 
@@ -333,7 +333,7 @@ def delete_shopcart_items(shopcart_id, item_id):
     Delete a ShopcartItem
     This endpoint will delete a ShopcartItem based the id specified in the path
     """
-    logger.info('Request to delete ShopcartItem with id: %s', item_id)
+    logger.info('Request to delete ShopcartItem with id: %s from Shopcart %s', item_id, shopcart_id)
 
     item = ShopcartItem.find(item_id)
     if item:
@@ -404,6 +404,5 @@ def initialize_logging(log_level=app.config['LOGGING_LEVEL']):
 
 def init_db():
     """ Initialies the SQLAlchemy app """
-    global app
     Shopcart.init_db(app)
     ShopcartItem.init_db(app)
