@@ -86,6 +86,18 @@ class Shopcart(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def delete(self):
+        """
+        Removes a Shopcart and everything in it
+        """
+        items = ShopcartItem.find_by_shopcartid(self.id)
+
+        for item in items:
+            item.delete()
+
+        db.session.delete(self)
+        db.session.commit()
+
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
         #ensure the (optional) time fields are strings
@@ -234,6 +246,11 @@ class ShopcartItem(db.Model):
         if not self.id:
             raise DataValidationError("Update called with empty ID field")
         db.session.commit()
+  
+    def delete(self):
+        """Removes a ShopcartItem from the data store"""
+        db.session.delete(self)
+        db.session.commit()
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
@@ -380,6 +397,6 @@ class ShopcartItem(db.Model):
 
     @classmethod
     def find(cls, id):
-        """ Finds a items in a shopcart based on the shopcart id provided """
-        cls.logger.info("Processing lookup for shopcart id %s ...", id)
+        """ Finds a items in a shopcart based on the shopcart item id provided """
+        cls.logger.info("Processing lookup for shopcart item id %s ...", id)
         return cls.query.get(id)

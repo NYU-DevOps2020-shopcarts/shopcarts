@@ -241,6 +241,27 @@ class TestShopcartServer(TestCase):
         for shopcart in data:
             self.assertEqual(shopcart["user_id"], test_user)
 
+    def test_delete_shopcart(self):
+        """Delete a Shopcart and everything in it"""
+        self.assertEqual(len(Shopcart.all()), 0)
+
+        shopcart = self._create_shopcarts(1)[0]
+
+        self.assertEqual(len(Shopcart.all()), 1)
+        self.assertEqual(len(ShopcartItem.all()), 0)
+
+        self._create_shopcart_items(5, shopcart.id)
+
+        self.assertEqual(len(ShopcartItem.all()), 5)
+
+        resp = self.app.delete(
+            "/shopcarts/{}".format(shopcart.id), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(resp.data), 0)
+
+        self.assertEqual(len(Shopcart.all()), 0)
+        self.assertEqual(len(ShopcartItem.all()), 0)
 
 
 ######################################################################
@@ -436,10 +457,11 @@ class TestShopcartServer(TestCase):
         for shopcart_item in data:
             self.assertEqual(shopcart_item["amount"], test_amount)
 
-    def get_shopcart_items(self):
+    def test_get_shopcart_items(self):
         """ Find shopcart items list by shopcart id """
+        shopcart = self._create_shopcarts(1)
+        shopcart_id = shopcart[0].id
         count = 5
-        shopcart_id = 1
         shopcart_items = self._create_shopcart_items(count,shopcart_id)
         response = self.app.get("/shopcartitems/"+ str(shopcart_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -448,7 +470,7 @@ class TestShopcartServer(TestCase):
         for item in shopcart_items_resp:
             self.assertEqual(item["sid"],shopcart_id)
 
-    def get_shopcart_items_with_zero_items(self):
+    def test_get_shopcart_items_with_zero_items(self):
         """ Find shopcart items list by shopcart id for shopcart with no items """
         shopcart_id = 1
         response = self.app.get("/shopcartitems/"+ str(shopcart_id))
@@ -456,6 +478,23 @@ class TestShopcartServer(TestCase):
         shopcart_items_resp = response.get_json()
         self.assertEqual(shopcart_items_resp["status"],404)
         self.assertEqual(shopcart_items_resp["error"],constants.NOT_FOUND)
+
+    def test_delete_shopcart_items(self):
+        """Delete a Shopcart Item"""
+        shopcart = self._create_shopcarts(1)[0]
+        shopcart_id = shopcart.id
+
+        self.assertEqual(len(ShopcartItem.all()), 0)
+        shopcart_item = self._create_shopcart_items(1, shopcart_id)[0]
+        self.assertEqual(len(ShopcartItem.all()), 1)
+
+        resp = self.app.delete(
+            "/shopcarts/{}/items/{}".format(shopcart_id, shopcart_item.id), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(resp.data), 0)
+
+        self.assertEqual(len(ShopcartItem.all()), 0)
 
 ######################################################################
 #   M A I N

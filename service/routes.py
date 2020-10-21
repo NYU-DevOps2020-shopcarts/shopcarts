@@ -306,6 +306,43 @@ def list_shopcart_items():
 
 
 ######################################################################
+# DELETE A SHOPCARTITEM
+######################################################################
+@app.route('/shopcarts/<int:shopcart_id>/items/<int:item_id>', methods=['DELETE'])
+def delete_shopcart_items(shopcart_id, item_id):
+    """
+    Delete a ShopcartItem
+    This endpoint will delete a ShopcartItem based the id specified in the path
+    """
+    logger.info('Request to delete ShopcartItem with id: %s', item_id)
+
+    item = ShopcartItem.find(item_id)
+    if item:
+        item.delete()
+
+    logger.info('ShopcartItem with id: %s has been deleted', item_id)
+    return make_response("", status.HTTP_204_NO_CONTENT)
+
+
+######################################################################
+# DELETE A SHOPCART
+######################################################################
+@app.route('/shopcarts/<int:shopcart_id>', methods=['DELETE'])
+def delete_shopcarts(shopcart_id):
+    """
+    Delete a Shopcart
+    This endpoint will delete a Shopcart based the id specified in the path
+    """
+    logger.info('Request to delete Shopcart with id: %s', shopcart_id)
+
+    item = Shopcart.find(shopcart_id)
+    if item:
+        item.delete()
+
+    logger.info('Shopcart with id: %s has been deleted', shopcart_id)
+    return make_response("", status.HTTP_204_NO_CONTENT)
+
+######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
 

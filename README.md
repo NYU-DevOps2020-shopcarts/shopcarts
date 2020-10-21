@@ -196,3 +196,13 @@ The response will be the shopcart for that user, or 404 if a shopcart does not e
 
 Shopcart items can be queried by sku, name, price, or amount with a `GET` request on `/shopcartitems` with the appropriate field indicated in the query of the request, for example, `/shopcartitems?sku=1000`
 The response will be a list of shopcart items where the indicated field has the desired value, or 404 if no shopcart items contain a field with that value.
+
+## Delete
+
+### Delete a Shopcart
+
+To delete a shopcart and everything in it, make a `DELETE` request to `/shopcarts/:sid`.
+
+### Delete a Shopcart Item
+
+To delete a shopcart item, make a `DELETE` request to `/shopcarts/:sid/items/:item_id`.

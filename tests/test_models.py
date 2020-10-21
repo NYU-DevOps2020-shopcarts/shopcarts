@@ -74,6 +74,32 @@ class TestShopcarts(unittest.TestCase):
         shopcarts = Shopcart.all()
         self.assertEqual(len(shopcarts), 1)
 
+    def test_delete_a_shopcart(self):
+        """Delete a shopcart and everything in it"""
+        self.assertEqual(len(Shopcart.all()), 0)
+
+        shopcart = Shopcart(user_id=12345)
+        shopcart.create()
+
+        self.assertEqual(shopcart.id, 1)
+        self.assertEqual(len(Shopcart.all()), 1)
+
+        self.assertEqual(len(ShopcartItem.all()), 0)
+
+        shopcart_item = ShopcartItem(sid=1, sku=5000, name="soap", price=2.23, amount=3)
+        shopcart_item.create()
+        self.assertEqual(shopcart_item.id, 1)
+
+        shopcart_item = ShopcartItem(sid=1, sku=5001, name="shampoo", price=3.77, amount=1)
+        shopcart_item.create()
+        self.assertEqual(shopcart_item.id, 2)
+
+        self.assertEqual(len(ShopcartItem.all()), 2)
+
+        shopcart.delete()
+        self.assertEqual(len(ShopcartItem.all()), 0)
+        self.assertEqual(len(Shopcart.all()), 0)
+
     def test_serialize_a_shopcart(self):
         """ Test serialization of a Shopcart """
         date_time = datetime.now()
@@ -273,6 +299,22 @@ class TestShopcartItems(unittest.TestCase):
         shopcart_item = ShopcartItem.all()
         self.assertEqual(len(shopcart_item), 1)
         self.assertEqual(shopcart_item[0].name, "soap")
+
+    def test_delete_a_shopcart_item(self):
+        """Delete a shopcart item"""
+        shopcart = Shopcart(user_id=12345)
+        shopcart.create()
+        self.assertEqual(shopcart.id, 1)
+
+        self.assertEqual(len(ShopcartItem.all()), 0)
+        shopcart_item = ShopcartItem(sid=1, sku=5000, name="soap", price=2.23, amount=3)
+        shopcart_item.create()
+        self.assertEqual(shopcart_item.id, 1)
+        self.assertEqual(len(ShopcartItem.all()), 1)
+
+        shopcart_item.delete()
+        self.assertEqual(len(ShopcartItem.all()), 0)
+
 
     def test_serialize_a_shopcart_item(self):
         """ Test serialization of a ShopcartItem """
