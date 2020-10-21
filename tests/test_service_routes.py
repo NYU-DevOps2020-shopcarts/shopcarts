@@ -387,6 +387,32 @@ class TestShopcartServer(TestCase):
         self.assertEqual(updated_shopcart_item["sku"], 1001)
         self.assertEqual(updated_shopcart_item["name"], "item_1")
         self.assertEqual(updated_shopcart_item["amount"], 4)
+    
+    def test_update_shopcart_item_with_non_existing_shopcart(self):
+        """ Update an item where shopcart doesn't exists """
+
+        # create a shopcart item to update
+        new_shopcart_item = { "price":50.00}
+        resp = self.app.put(
+            "/shopcartitems/{}".format(1),
+            json=new_shopcart_item,
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_query_shopcart_item(self):
+        """ Query shopcart item list without any query string """
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, 
+        content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        shopcart_id = resp.json["id"]
+        count = 10
+        shopcart_items = self._create_shopcart_items(count, shopcart_id)
+        resp = self.app.get("/shopcartitems")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data =resp.get_json()
+        self.assertEqual(len(data), count)
 
     def test_query_shopcart_item_list_by_sku(self):
         """ Query shopcart item list by sku """
@@ -503,6 +529,18 @@ class TestShopcartServer(TestCase):
         self.assertEqual(len(resp.data), 0)
 
         self.assertEqual(len(ShopcartItem.all()), 0)
+
+    def test_post_request_without_content_type(self):
+        """POST Request Without content_type"""
+        resp = self.app.post("/shopcarts")
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        self.assertIn(b'Unsupported media type', resp.data)
+
+    def test_post_request_with_wrong_content_type(self):
+        """POST Request With Wrong content_type"""
+        resp = self.app.post("/shopcarts", content_type="text/plain")
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        self.assertIn(b'Unsupported media type', resp.data)
 
 ######################################################################
 #  ERROR HANDLER TEST CASES

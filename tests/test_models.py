@@ -52,6 +52,11 @@ class TestShopcarts(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
+    # def test_repr(self):
+    #     shopcart = Shopcart(id = 1).__repr__
+    #     #val = shopcart.__repr__ 
+    #     self.assertEqual(shopcart,"<Shopcart %r>" % (1))
+
     def test_create_a_shopcart(self):
         """ Create a shopcart and assert that it exists """
         date_time = datetime.now()
@@ -155,7 +160,7 @@ class TestShopcarts(unittest.TestCase):
         self.assertEqual(shopcart.user_id, 120)
         self.assertEqual(shopcart.create_time, date_time)
         self.assertEqual(shopcart.update_time, date_time)
-
+    
     def test_deserialize_a_shopcart_datestring(self):
         """ Test deserialization of a Shopcart with date string """
         date_time = datetime.now()
@@ -183,6 +188,12 @@ class TestShopcarts(unittest.TestCase):
     def test_deserialize__shopcart_bad_data(self):
         """ Test deserialization of bad data for a Shopcart """
         data = "this is not a dictionary"
+        shopcart = Shopcart()
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+    
+    def test_deserialize__shopcart_key_error(self):
+        """ Test deserialization of bad data for a Shopcart """
+        data = {"id":100}
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
 
@@ -299,6 +310,20 @@ class TestShopcartItems(unittest.TestCase):
         shopcart_item = ShopcartItem.all()
         self.assertEqual(len(shopcart_item), 1)
         self.assertEqual(shopcart_item[0].name, "soap")
+
+    def test_update_a_shopcart_item_without_id(self):
+        """ Update a shopcart item """
+        shopcart = Shopcart(user_id=12345)
+        shopcart.create()
+
+        date_time = datetime.now()
+        shopcart_item = ShopcartItem(sid=shopcart.id, sku=5000, name="soap", price=2.23,
+                                    amount=3, create_time=date_time, update_time=date_time)
+        shopcart_item.create()
+        # Change it an update it
+        shopcart_item.id = None
+        self.assertRaises(DataValidationError,shopcart_item.update)
+       
 
     def test_delete_a_shopcart_item(self):
         """Delete a shopcart item"""
@@ -442,6 +467,12 @@ class TestShopcartItems(unittest.TestCase):
     def test_deserialize_shopcart_item_bad_data(self):
         """ Test deserialization of bad data for a ShopcartItem """
         data = "this is not a dictionary"
+        shopcart_item = ShopcartItem()
+        self.assertRaises(DataValidationError, shopcart_item.deserialize, data)
+
+    def test_deserialize_shopcart_item_key_error(self):
+        """ Test deserialization of bad data with key error for a ShopcartItem """
+        data = {"id":1}
         shopcart_item = ShopcartItem()
         self.assertRaises(DataValidationError, shopcart_item.deserialize, data)
 

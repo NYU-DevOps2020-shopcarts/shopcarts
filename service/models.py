@@ -71,8 +71,8 @@ class Shopcart(db.Model):
     # INSTANCE METHODS
     ##################################################
 
-    def __repr__(self):
-        return "<Shopcart %r>" % (self.id)
+    # def __repr__(self):
+    #     return "<Shopcart %r>" % (self.id)
 
     def create(self):
         """
@@ -222,8 +222,8 @@ class ShopcartItem(db.Model):
     # INSTANCE METHODS
     ##################################################
 
-    def __repr__(self):
-        return "<ShopcartItem %r>" % (self.id)
+    # def __repr__(self):
+    #     return "<ShopcartItem %r>" % (self.id)
 
     def create(self):
         """
