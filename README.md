@@ -27,13 +27,12 @@ honcho start
 ### Shopcart
 #### Attributes:
 -----------
-id (int) - shop cart id
-
-user_id (int) - user id
-
-create_time (DateTime) - the time this shopcart was created
-
-update_time (DateTime) - the time this shopcart was updated
+| Name        | Type     | Purpose                              |
+|-------------|----------|--------------------------------------|
+| id          | int      | Primary key for the table            |
+| user_id     | int      | User id whose shopcart this is       |
+| create_time | datetime | Time when shopcart was created       |
+| update_time | datetime | Time when shopcart was last modified |
 
 ### ShopcartItem - Contains product information for an item in a shopcart
 #### Attributes:
