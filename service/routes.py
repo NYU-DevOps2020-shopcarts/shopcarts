@@ -20,6 +20,7 @@ Paths:
 GET / - Displays a usage information for Selenium testing
 POST /shopcarts - creates a new shopcart record in the database
 POST /shopcartitems - creates a new shopcart item record in the database
+PUT /shopcartitems/{id} - updates a shopcart record in the database
 GET /shopcarts - Returns a list all of the Shopcarts
 """
 
@@ -228,6 +229,27 @@ def create_shopcart_items():
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
+
+
+######################################################################
+# UPDATE AN EXISTING SHOPCARTITEM
+######################################################################
+@app.route("/shopcartitems/<int:shopcart_item_id>", methods=["PUT"])
+def update(shopcart_item_id):
+    """
+    Update a Shopcart item
+    This endpoint will update a Shopcart item based the body that is posted
+    """
+    app.logger.info("Request to update Shopcart item with id: %s", shopcart_item_id)
+    check_content_type("application/json")
+    shopcart_item = ShopcartItem.find(shopcart_item_id)
+    if not shopcart_item:
+        raise NotFound("Shopcart item with id '{}' was not found.".format(shopcart_item))
+    shopcart_item.deserialize(request.get_json())
+    shopcart_item.update()
+
+    app.logger.info("Shopcart item with ID [%s] updated.", shopcart_item.id)
+    return make_response(jsonify(shopcart_item.serialize()), status.HTTP_200_OK)
 
 
 ######################################################################

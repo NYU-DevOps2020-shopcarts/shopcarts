@@ -332,6 +332,38 @@ class TestShopcartServer(TestCase):
         #    new_shopcart_item["update_time"], "Update time not set"
         #)
 
+    def test_update_shopcart_item(self):
+        """ Update an existing shopcart item """
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(), content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # create a shopcart item to update
+        test_shopcart_item = ShopcartItemFactory()
+        test_shopcart_item.sid = resp.json["id"]
+        resp = self.app.post(
+            "/shopcartitems", json=test_shopcart_item.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # update the shopcart item
+        new_shopcart_item = resp.get_json()
+        new_shopcart_item["price"] = 50.00
+        new_shopcart_item["sku"] = 1001
+        new_shopcart_item["name"] = "item_1"
+        new_shopcart_item["amount"] = 4
+        resp = self.app.put(
+            "/shopcartitems/{}".format(new_shopcart_item["id"]),
+            json=new_shopcart_item,
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        updated_shopcart_item = resp.get_json()
+        self.assertEqual(updated_shopcart_item["price"], 50.00)
+        self.assertEqual(updated_shopcart_item["sku"], 1001)
+        self.assertEqual(updated_shopcart_item["name"], "item_1")
+        self.assertEqual(updated_shopcart_item["amount"], 4)
+
     def test_query_shopcart_item_list_by_sku(self):
         """ Query shopcart item list by sku """
         test_shopcart = ShopcartFactory()

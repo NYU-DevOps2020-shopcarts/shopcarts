@@ -177,6 +177,18 @@ A shopcart list can be got with a `GET` request on `'/shopcarts'`. The response 
     }
 ]
 ```
+## Updating a Shopcart Item
+A shopcart item can be updated with a `PUT` request on `'/shopcartitems/id'`. 
+
+When an authorized user hits a PUT request on '/shopcartitems', the API will return the updated shopcart item with a status code 200. The content for the PUT request would something like this:
+
+```json
+{
+    "amount": 4,
+}
+```
+
+The response will contain the full shopcart item.
 
 ## Querying Shopcarts
 A shopcart can be queried by user with a `GET` request on `/shopcarts` with the user_id set in the query string of the request, for example, `/shopcarts?user_id=100`

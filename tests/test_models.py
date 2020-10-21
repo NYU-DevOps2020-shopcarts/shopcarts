@@ -253,6 +253,26 @@ class TestShopcartItems(unittest.TestCase):
         self.assertEqual(shopcart_item.name, "soap")
         self.assertEqual(shopcart_item.price, 2.23)
         self.assertEqual(shopcart_item.amount, 3)
+        
+    def test_update_a_shopcart_item(self):
+        """ Update a shopcart item """
+        shopcart = Shopcart(user_id=12345)
+        shopcart.create()
+
+        date_time = datetime.now()
+        shopcart_item = ShopcartItem(sid=shopcart.id, sku=5000, name="soap", price=2.23,
+                                    amount=3, create_time=date_time, update_time=date_time)
+        shopcart_item.create()
+        self.assertEqual(shopcart_item.id, 1)
+        # Change it an update it
+        shopcart_item.name = "soap"
+        shopcart_item.update()
+        self.assertEqual(shopcart_item.id, 1)
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        shopcart_item = ShopcartItem.all()
+        self.assertEqual(len(shopcart_item), 1)
+        self.assertEqual(shopcart_item[0].name, "soap")
 
     def test_serialize_a_shopcart_item(self):
         """ Test serialization of a ShopcartItem """

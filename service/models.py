@@ -171,7 +171,6 @@ class Shopcart(db.Model):
         cls.logger.info("Processing lookup for shopcart id %s ...", id)
         return cls.query.get(id)
 
-
     @classmethod
     def find_by_user(cls, user_id : int):
         """ Returns shopcart for a user
@@ -226,6 +225,14 @@ class ShopcartItem(db.Model):
         self.create_time = date_time
         self.update_time = date_time
         db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        """
+        Updates a ShopcartItem to the database
+        """
+        if not self.id:
+            raise DataValidationError("Update called with empty ID field")
         db.session.commit()
 
     def serialize(self):
@@ -370,3 +377,9 @@ class ShopcartItem(db.Model):
         """ Finds a items in a shopcart based on the shopcart id provided """
         cls.logger.info("Processing lookup or 404 for id %s ...", id)
         return cls.query.filter_by(sid = id).all()
+
+    @classmethod
+    def find(cls, id):
+        """ Finds a items in a shopcart based on the shopcart id provided """
+        cls.logger.info("Processing lookup for shopcart id %s ...", id)
+        return cls.query.get(id)
