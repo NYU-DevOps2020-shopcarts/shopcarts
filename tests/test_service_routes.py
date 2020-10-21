@@ -264,6 +264,52 @@ class TestShopcartServer(TestCase):
         self.assertEqual(len(Shopcart.all()), 0)
         self.assertEqual(len(ShopcartItem.all()), 0)
 
+    def test_place_order(self):
+        """ Test sending shopcart order """
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+                             content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        shopcart_id = resp.json["id"]
+        shopcart_items = self._create_shopcart_items(10, shopcart_id)
+        test_sku = shopcart_items[0].sku
+        sku_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
+                              if shopcart_item.sku == test_sku]
+        resp = self.app.get("/shopcartitems", query_string="sku={}".format(test_sku))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data =resp.get_json()
+        self.assertEqual(len(data), len(sku_shopcart_items))
+
+        resp = self.app.put(
+            "/shopcarts/{}/place-order".format(shopcart_id),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(resp.data), 0)
+        self.assertEqual(len(Shopcart.all()), 0)
+        self.assertEqual(len(ShopcartItem.all()), 0)
+
+    def test_place_order_invalid_shopcart(self):
+        test_shopcart = Shopcart()
+        test_shopcart.id = 1
+        resp = self.app.put(
+            "/shopcarts/{}/place-order".format(test_shopcart.id),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_place_order_empty_shopcart(self):
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+                             content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        shopcart_id = resp.json["id"]
+
+        resp = self.app.put(
+            "/shopcarts/{}/place-order".format(shopcart_id),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 ######################################################################
 #  S H O P C A R T I T E M   T E S T   C A S E S
@@ -387,7 +433,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(updated_shopcart_item["sku"], 1001)
         self.assertEqual(updated_shopcart_item["name"], "item_1")
         self.assertEqual(updated_shopcart_item["amount"], 4)
-    
+
     def test_update_shopcart_item_with_non_existing_shopcart(self):
         """ Update an item where shopcart doesn't exists """
 
@@ -403,7 +449,7 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item(self):
         """ Query shopcart item list without any query string """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id}, 
+        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
         content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
@@ -503,6 +549,11 @@ class TestShopcartServer(TestCase):
         for item in shopcart_items_resp:
             self.assertEqual(item["sid"],shopcart_id)
 
+    def test_get_shopcart_item_not_found(self):
+        """ Get a Shopcart Item thats not found """
+        resp = self.app.get("/shopcartitem/0")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_get_shopcart_items_with_zero_items(self):
         """ Find shopcart items list by shopcart id for shopcart with no items """
         shopcart_id = 1
@@ -541,6 +592,7 @@ class TestShopcartServer(TestCase):
         resp = self.app.post("/shopcarts", content_type="text/plain")
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
         self.assertIn(b'Unsupported media type', resp.data)
+
 
 ######################################################################
 #  ERROR HANDLER TEST CASES

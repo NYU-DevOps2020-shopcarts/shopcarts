@@ -362,6 +362,36 @@ def delete_shopcarts(shopcart_id):
     return make_response("", status.HTTP_204_NO_CONTENT)
 
 ######################################################################
+# PLACE ORDER FOR A SHOPCART
+######################################################################
+@app.route('/shopcarts/<int:shopcart_id>/place-order', methods=['PUT'])
+def place_shopcart_order(shopcart_id):
+    """
+    Place Order for a Shopcart
+    This endpoint will place an order for a Shopcart based the id specified in the path
+    """
+    logger.info('Request to place order for Shopcart with id: %s', shopcart_id)
+
+    shopcart = Shopcart.find(shopcart_id)
+    if shopcart:
+        shopcart_items =  ShopcartItem.find_by_shopcartid(shopcart_id)
+        if shopcart_items is None or len(shopcart_items)==0:
+            logger.info("Shopcart with ID [%s] is empty.", shopcart_id)
+            return not_found("Not found")
+        shopcart_items_list = [item.serialize() for item in shopcart_items]
+
+        #once we have the list of shopcart items we can send in JSON format to the orders team
+        #SEND shocart_items_list TO ORDERS TEAM
+
+        shopcart.delete()
+
+        logger.info('Shopcart with id: %s has been deleted', shopcart_id)
+        return make_response("", status.HTTP_204_NO_CONTENT)
+
+    logger.info("Shopcart with ID [%s] is does not exist.", shopcart_id)
+    return not_found("Shopcart Not found")
+
+######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
 

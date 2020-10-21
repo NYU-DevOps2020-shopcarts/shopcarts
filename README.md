@@ -208,3 +208,7 @@ To delete a shopcart and everything in it, make a `DELETE` request to `/shopcart
 ### Delete a Shopcart Item
 
 To delete a shopcart item, make a `DELETE` request to `/shopcarts/:sid/items/:item_id`.
+
+### Place an order from a Shopcart
+
+To place an order, make a `PUT` request to `/shopcarts/:id/place-order`. The shopcart will be deleted after the order is placed.
