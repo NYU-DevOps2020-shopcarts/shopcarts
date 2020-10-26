@@ -28,10 +28,10 @@ from flask_api import status  # HTTP Status Codes
 from shopcart_factory import ShopcartFactory, ShopcartItemFactory
 from service.models import Shopcart, ShopcartItem, DataValidationError, db
 from service import routes
-from service import app,constants
+from service import app, constants
+from config import DATABASE_URI
 
 
-DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///../db/test.db")
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################

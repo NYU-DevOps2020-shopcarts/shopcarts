@@ -22,8 +22,8 @@ import os
 from datetime import datetime
 from service.models import Shopcart, ShopcartItem, DataValidationError, db
 from service import app
+from config import DATABASE_URI
 
-DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///../db/test.db")
 
 ######################################################################
 #  T E S T   C A S E S
