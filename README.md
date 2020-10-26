@@ -77,16 +77,18 @@ You can also manually run `nosetests` with `coverage` (but `setup.cfg` does this
 Logging is set up to track events.
 
 ## Routes
-| URL                              | HTTP method | Description                   |
-|----------------------------------|-------------|-------------------------------|
-| /shopcarts                       | GET         | Get a shopcart list           |
-| /shopcarts                       | POST        | Create a shopcart             |
-| /shopcarts                       | DELETE      | Delete a shopcart             |
-| /shopcartitems/<sid>             | GET         | Get item list from a shopcart |
-| /shopcartitems/<sid>             | POST        | Create a shopcart item        |
-| /shopcartitems/<sid>             | PUT         | Update a shopcart item        |
-| /shopcarts/<sid>/items/<item_id> | DELETE      | Delete a shopcart item        |
-| /shopcarts/<sid>/place-order     | PUT         | Place an order                |
+| URL                               | HTTP method | Description                   |
+|-----------------------------------|-------------|-------------------------------|
+| /shopcarts                        | GET         | Get a shopcart list           |
+| /shopcarts                        | POST        | Create a shopcart             |
+| /shopcarts/<:id>                  | DELETE      | Delete a shopcart             |
+| /shopcarts/<:id>/items            | GET         | Get item list from a shopcart |
+| /shopcarts/<:id>/items            | POST        | Create a shopcart item        |
+| /shopcarts/<:id>/items/<item_id>  | PUT         | Update a shopcart item        |
+| /shopcarts/<:id>/items/<item_id>  | DELETE      | Delete a shopcart item        |
+| /shopcarts/<:id>/items/<item_id>  | GET         | Gets a shopcart item          |
+| /shopcarts/items                  | GET         | Get all shopcart items        |
+| /shopcarts/<:id>/place-order      | PUT         | Place an order                |
 
 ## Creating a Shopcart or Shopcart Item
 A shopcart can be created with a `POST` request on `'/shopcarts'` with, for example, the required conent including the following parameters:
@@ -98,7 +100,7 @@ A shopcart can be created with a `POST` request on `'/shopcarts'` with, for exam
     "update_time": null
 }
 ```
-A shopcart item can be created with a `POST` request on `/shopcartitems'`  with required parameters: 
+A shopcart item can be created with a `POST` request on `/shopcarts/:id/items'`  with required parameters: 
 ```json
 {
     "id": null,
@@ -186,7 +188,7 @@ A shopcart list can be got with a `GET` request on `'/shopcarts'`. The response 
 ]
 ```
 ## Updating a Shopcart Item
-A shopcart item can be updated with a `PUT` request on `'/shopcartitems/id'`. 
+A shopcart item can be updated with a `PUT` request on `'/shopcarts/:id/items/:item_id'`. 
 
 When an authorized user hits a PUT request on '/shopcartitems', the API will return the updated shopcart item with a status code 200. The content for the PUT request would something like this:
 
@@ -202,18 +204,18 @@ The response will contain the full shopcart item.
 A shopcart can be queried by user with a `GET` request on `/shopcarts` with the user_id set in the query string of the request, for example, `/shopcarts?user_id=100`
 The response will be the shopcart for that user, or 404 if a shopcart does not exist for that user.
 
-Shopcart items can be queried by sku, name, price, or amount with a `GET` request on `/shopcartitems` with the appropriate field indicated in the query of the request, for example, `/shopcartitems?sku=1000`
+Shopcart items can be queried by sku, name, price, or amount with a `GET` request on `/shopcarts/items` with the appropriate field indicated in the query of the request, for example, `/shopcarts/items?sku=1000`
 The response will be a list of shopcart items where the indicated field has the desired value, or 404 if no shopcart items contain a field with that value.
 
 ## Delete
 
 ### Delete a Shopcart
 
-To delete a shopcart and everything in it, make a `DELETE` request to `/shopcarts/:sid`.
+To delete a shopcart and everything in it, make a `DELETE` request to `/shopcarts/:id`.
 
 ### Delete a Shopcart Item
 
-To delete a shopcart item, make a `DELETE` request to `/shopcarts/:sid/items/:item_id`.
+To delete a shopcart item, make a `DELETE` request to `/shopcarts/:id/items/:item_id`.
 
 ### Place an order from a Shopcart
 

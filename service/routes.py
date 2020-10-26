@@ -29,7 +29,7 @@ import logging
 from flask import jsonify, request, url_for, make_response, abort
 from flask.logging import create_logger
 from flask_api import status  # HTTP Status Codes
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, BadRequest
 
 
 from .models import Shopcart, ShopcartItem, DataValidationError
@@ -159,7 +159,7 @@ def create_shopcarts():
 ######################################################################
 # G E T  S H O P C A R T
 ######################################################################
-@app.route("/shopcarts/<shopcart_id>", methods=["GET"])
+@app.route("/shopcarts/<int:shopcart_id>", methods=["GET"])
 def get_shopcart(shopcart_id):
     """
     Gets information about a Shopcart
@@ -183,7 +183,7 @@ def get_shopcart(shopcart_id):
 ######################################################################
 # G E T  S H O P C A R T  D E T A I L S
 ######################################################################
-@app.route("/shopcartitems/<shopcart_id>", methods=["GET"])
+@app.route("/shopcarts/<int:shopcart_id>/items/", methods=["GET"])
 def get_shopcart_items(shopcart_id):
     """
     Get information of a shopcart
@@ -206,22 +206,26 @@ def get_shopcart_items(shopcart_id):
 ######################################################################
 # G E T  S H O P C A R T  I T E M
 ######################################################################
-@app.route("/shopcartitem/<shopcart_item_id>", methods=["GET"])
-def get_shopcart_item(shopcart_item_id):
+@app.route('/shopcarts/<int:shopcart_id>/items/<int:item_id>', methods=["GET"])
+def get_shopcart_item(shopcart_id, item_id):
     """
     Get a shopcart item
     This endpoint will return an item in the shop cart
     """
     logger.info("Request to get an item in a shopcart")
 
-    shopcart_item =  ShopcartItem.find(shopcart_item_id)
+    if item_id != shopcart_id:
+        raise BadRequest("Shopcart id '{}' does not match item id '{}'.".format(
+                         shopcart_id, item_id))
+
+    shopcart_item =  ShopcartItem.find(item_id)
 
     if shopcart_item is None:
-        logger.info("Shopcart item with ID [%s] not found.", shopcart_item_id)
+        logger.info("Shopcart item with ID [%s] not found.", item_id)
         return not_found("Not found")
 
     result = shopcart_item.serialize()
-    logger.info("Fetched shopcart item with ID [%s].", shopcart_item_id)
+    logger.info("Fetched shopcart item with ID [%s].", item_id)
     return make_response(
         jsonify(result), status.HTTP_200_OK
     )
@@ -229,8 +233,8 @@ def get_shopcart_item(shopcart_item_id):
 ######################################################################
 # ADD A NEW SHOPCARTITEM
 ######################################################################
-@app.route("/shopcartitems", methods=["POST"])
-def create_shopcart_items():
+@app.route("/shopcarts/<int:shopcart_id>/items", methods=["POST"])
+def create_shopcart_items(shopcart_id):
     """
     Creates a ShopcartItem
     This endpoint will create a ShopcartItem based the data in the body that is posted
@@ -238,12 +242,12 @@ def create_shopcart_items():
     logger.info("Request to create a shopcart item")
     check_content_type("application/json")
     shopcart_item = ShopcartItem()
-    print(request.get_json)
     shopcart_item.deserialize(request.get_json())
+    shopcart_item.sid = shopcart_id
     shopcart_item.create()
     message = shopcart_item.serialize()
     location_url = url_for("get_shopcart_item",
-                            shopcart_item_id=shopcart_item.id, _external=True)
+                            shopcart_id=shopcart_item.sid, item_id=shopcart_item.id, _external=True)
     logger.info("ShopcartItem with ID [%s] created.", shopcart_item.id)
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
@@ -253,15 +257,19 @@ def create_shopcart_items():
 ######################################################################
 # UPDATE AN EXISTING SHOPCARTITEM
 ######################################################################
-@app.route("/shopcartitems/<int:shopcart_item_id>", methods=["PUT"])
-def update(shopcart_item_id):
+@app.route("/shopcarts/<int:shopcart_id>/items/<int:item_id>", methods=["PUT"])
+def update(shopcart_id, item_id):
     """
     Update a Shopcart item
     This endpoint will update a Shopcart item based the body that is posted
     """
-    app.logger.info("Request to update Shopcart item with id: %s", shopcart_item_id)
+    app.logger.info("Request to update Shopcart item with id: %s", item_id)
     check_content_type("application/json")
-    shopcart_item = ShopcartItem.find(shopcart_item_id)
+
+    if item_id != shopcart_id:
+        raise BadRequest("Shopcart id '{}' does not match item id '{}'.".format(
+                          shopcart_id, item_id))
+    shopcart_item = ShopcartItem.find(item_id)
     if not shopcart_item:
         raise NotFound("Shopcart item with id '{}' was not found.".format(shopcart_item))
     shopcart_item.deserialize(request.get_json())
@@ -294,7 +302,7 @@ def list_shopcarts():
 ######################################################################
 # LIST ALL SHOPCARTITEMS
 ######################################################################
-@app.route('/shopcartitems', methods=['GET'])
+@app.route('/shopcarts/items', methods=['GET'])
 def list_shopcart_items():
     """ Returns all of the ShopcartItems """
     logger.info('Request to list ShopcartItems...')

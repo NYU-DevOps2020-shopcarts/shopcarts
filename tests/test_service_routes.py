@@ -275,7 +275,7 @@ class TestShopcartServer(TestCase):
         test_sku = shopcart_items[0].sku
         sku_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.sku == test_sku]
-        resp = self.app.get("/shopcartitems", query_string="sku={}".format(test_sku))
+        resp = self.app.get("/shopcarts/items", query_string="sku={}".format(test_sku))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data =resp.get_json()
         self.assertEqual(len(data), len(sku_shopcart_items))
@@ -325,7 +325,7 @@ class TestShopcartServer(TestCase):
                 test_shopcart_item.sid = sid
 
             resp = self.app.post(
-            "/shopcartitems", json=test_shopcart_item.serialize(),
+            "/shopcarts/{}/items".format(sid), json=test_shopcart_item.serialize(),
                 content_type="application/json"
             )
             self.assertEqual(
@@ -345,7 +345,8 @@ class TestShopcartServer(TestCase):
         test_shopcart_item = ShopcartItemFactory()
         test_shopcart_item.sid = resp.json["id"]
         resp = self.app.post(
-            "/shopcartitems", json=test_shopcart_item.serialize(), content_type="application/json"
+            "/shopcarts/{}/items".format(test_shopcart_item.sid),
+            json=test_shopcart_item.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         # Make sure location header is set
@@ -412,7 +413,8 @@ class TestShopcartServer(TestCase):
         test_shopcart_item = ShopcartItemFactory()
         test_shopcart_item.sid = resp.json["id"]
         resp = self.app.post(
-            "/shopcartitems", json=test_shopcart_item.serialize(), content_type="application/json"
+            "/shopcarts/{}/items".format(test_shopcart_item.sid),
+            json=test_shopcart_item.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
@@ -423,7 +425,7 @@ class TestShopcartServer(TestCase):
         new_shopcart_item["name"] = "item_1"
         new_shopcart_item["amount"] = 4
         resp = self.app.put(
-            "/shopcartitems/{}".format(new_shopcart_item["id"]),
+            "/shopcarts/{}/items/{}".format(new_shopcart_item["sid"], new_shopcart_item["id"]),
             json=new_shopcart_item,
             content_type="application/json",
         )
@@ -434,13 +436,42 @@ class TestShopcartServer(TestCase):
         self.assertEqual(updated_shopcart_item["name"], "item_1")
         self.assertEqual(updated_shopcart_item["amount"], 4)
 
+    def test_update_shopcart_item_bad_request(self):
+        """ Test update an existing shopcart item with a bad request """
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
+                             content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # create a shopcart item to update
+        test_shopcart_item = ShopcartItemFactory()
+        test_shopcart_item.sid = resp.json["id"]
+        resp = self.app.post(
+            "/shopcarts/{}/items".format(test_shopcart_item.sid),
+            json=test_shopcart_item.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # update the shopcart item
+        new_shopcart_item = resp.get_json()
+        new_shopcart_item["price"] = 50.00
+        new_shopcart_item["sku"] = 1001
+        new_shopcart_item["name"] = "item_1"
+        new_shopcart_item["amount"] = 4
+        resp = self.app.put(
+            "/shopcarts/{}/items/{}".format(new_shopcart_item["sid"] + 1, new_shopcart_item["id"]),
+            json=new_shopcart_item,
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_update_shopcart_item_with_non_existing_shopcart(self):
         """ Update an item where shopcart doesn't exists """
 
         # create a shopcart item to update
         new_shopcart_item = { "price":50.00}
         resp = self.app.put(
-            "/shopcartitems/{}".format(1),
+            "/shopcarts/{}/items/{}".format(1, 1),
             json=new_shopcart_item,
             content_type="application/json",
         )
@@ -455,7 +486,7 @@ class TestShopcartServer(TestCase):
         shopcart_id = resp.json["id"]
         count = 10
         shopcart_items = self._create_shopcart_items(count, shopcart_id)
-        resp = self.app.get("/shopcartitems")
+        resp = self.app.get("/shopcarts/items")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data =resp.get_json()
         self.assertEqual(len(data), count)
@@ -471,7 +502,8 @@ class TestShopcartServer(TestCase):
         test_sku = shopcart_items[0].sku
         sku_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.sku == test_sku]
-        resp = self.app.get("/shopcartitems", query_string="sku={}".format(test_sku))
+        resp = self.app.get("/shopcarts/items",
+                            query_string="sku={}".format(test_sku))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data =resp.get_json()
         self.assertEqual(len(data), len(sku_shopcart_items))
@@ -490,7 +522,8 @@ class TestShopcartServer(TestCase):
         test_name = shopcart_items[0].name
         name_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.name == test_name]
-        resp = self.app.get("/shopcartitems", query_string="name={}".format(test_name))
+        resp = self.app.get("/shopcarts/items",
+                            query_string="name={}".format(test_name))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data =resp.get_json()
         self.assertEqual(len(data), len(name_shopcart_items))
@@ -509,7 +542,8 @@ class TestShopcartServer(TestCase):
         test_price = shopcart_items[0].price
         price_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.price == test_price]
-        resp = self.app.get("/shopcartitems", query_string="price={}".format(test_price))
+        resp = self.app.get("/shopcarts/items",
+                            query_string="price={}".format(test_price))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data =resp.get_json()
         self.assertEqual(len(data), len(price_shopcart_items))
@@ -528,7 +562,8 @@ class TestShopcartServer(TestCase):
         test_amount = shopcart_items[0].amount
         amount_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.amount == test_amount]
-        resp = self.app.get("/shopcartitems", query_string="amount={}".format(test_amount))
+        resp = self.app.get("/shopcarts/items",
+                            query_string="amount={}".format(test_amount))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data =resp.get_json()
         self.assertEqual(len(data), len(amount_shopcart_items))
@@ -542,7 +577,7 @@ class TestShopcartServer(TestCase):
         shopcart_id = shopcart[0].id
         count = 5
         shopcart_items = self._create_shopcart_items(count,shopcart_id)
-        response = self.app.get("/shopcartitems/"+ str(shopcart_id))
+        response = self.app.get("/shopcarts/{}/items/".format(shopcart_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         shopcart_items_resp = response.get_json()
         self.assertTrue(len(shopcart_items)!=0)
@@ -551,13 +586,18 @@ class TestShopcartServer(TestCase):
 
     def test_get_shopcart_item_not_found(self):
         """ Get a Shopcart Item thats not found """
-        resp = self.app.get("/shopcartitem/0")
+        resp = self.app.get("/shopcarts/0/items/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_shopcart_item_not_found_bad_request(self):
+        """ Get a Shopcart Item with a bad request """
+        resp = self.app.get("/shopcarts/1/items/0")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_shopcart_items_with_zero_items(self):
         """ Find shopcart items list by shopcart id for shopcart with no items """
         shopcart_id = 1
-        response = self.app.get("/shopcartitems/"+ str(shopcart_id))
+        response = self.app.get("/shopcarts/{}/items/".format(shopcart_id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         shopcart_items_resp = response.get_json()
         self.assertEqual(shopcart_items_resp["status"],404)
@@ -609,7 +649,7 @@ class TestShopcartServer(TestCase):
 
     def test_method_not_allowed(self):
         """ Test method not allowed """
-        resp = self.app.post("/shopcarts/update")
+        resp = self.app.post("/")
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertIn(b'Method not Allowed', resp.data)
 
