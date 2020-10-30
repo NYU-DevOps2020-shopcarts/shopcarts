@@ -7,6 +7,10 @@ The shopcarts resource allows customers to make a collection of products that th
 
 ## Run The Service
 
+### Online demo
+
+IBM Cloud Foundry App for this project can be accessed at [here](https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/).
+
 ### Development Mode
 
 To run the service in development mode, please use:
