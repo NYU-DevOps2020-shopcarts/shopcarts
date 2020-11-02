@@ -290,6 +290,63 @@ class TestShopcartItems(unittest.TestCase):
         self.assertEqual(shopcart_item.name, "soap")
         self.assertEqual(shopcart_item.price, 2.23)
         self.assertEqual(shopcart_item.amount, 3)
+    
+    def test_shopcart_item_creation_using_add(self):
+        """ Create a shopcart item and add it to the database using add method"""
+        shopcarts = Shopcart.all()
+        self.assertEqual(shopcarts, [])
+        shopcart = Shopcart(user_id=12345)
+        self.assertTrue(shopcart is not None)
+        self.assertEqual(shopcart.id, None)
+        shopcart.create()
+        self.assertEqual(shopcart.id, 1)
+        shopcart_item = ShopcartItem(sid=shopcart.id, sku=5000, name="soap", price=2.23,
+                                     amount=3)
+        shopcart_item.add()
+        self.assertTrue(shopcart_item is not None)
+        self.assertEqual(shopcart_item.sid, 1)
+        self.assertEqual(shopcart_item.sku, 5000)
+        self.assertEqual(shopcart_item.name, "soap")
+        self.assertEqual(shopcart_item.price, 2.23)
+        self.assertEqual(shopcart_item.amount, 3)
+
+    def test_shopcart_item_updation_using_add(self):
+        """ Create a shopcart item and update it in the database using add method"""
+        shopcarts = Shopcart.all()
+        self.assertEqual(shopcarts, [])
+        shopcart = Shopcart(user_id=12345)
+        self.assertTrue(shopcart is not None)
+        self.assertEqual(shopcart.id, None)
+        shopcart.create()
+        self.assertEqual(shopcart.id, 1)
+        shopcart_item = ShopcartItem(sid=shopcart.id, sku=5000, name="soap", price=2.23,
+                                     amount=3)
+        shopcart_item.add()
+        self.assertEqual(shopcart_item.sid, 1)
+        shopcart_item = ShopcartItem(sid=shopcart.id, sku=5000, name="soap", price=2.23,
+                                     amount=3)
+        shopcart_item.add()
+        self.assertTrue(shopcart_item is not None)
+        self.assertEqual(shopcart_item.sid, shopcart.id)
+        self.assertEqual(shopcart_item.sku, 5000)
+        self.assertEqual(shopcart_item.name, "soap")
+        self.assertEqual(shopcart_item.price, 2.23)
+        self.assertEqual(shopcart_item.amount, 6)
+
+    def test_add_shopcart_item_with_not_existing_cart(self):
+        """ Test using add shopcart_item method when shopcart doesnt exists"""
+        shopcarts = Shopcart.all()
+        self.assertEqual(shopcarts, [])
+        shopcart = Shopcart(user_id=12345)
+        self.assertTrue(shopcart is not None)
+        self.assertEqual(shopcart.id, None)
+        shopcart.create()
+        self.assertEqual(shopcart.id, 1)
+        shopcart_item = ShopcartItem(sid=1000, sku=5000, name="soap", price=2.23,
+                                     amount=3)
+        
+        self.assertRaises(DataValidationError,shopcart_item.add)
+
 
     def test_update_a_shopcart_item(self):
         """ Update a shopcart item """
@@ -310,6 +367,7 @@ class TestShopcartItems(unittest.TestCase):
         shopcart_item = ShopcartItem.all()
         self.assertEqual(len(shopcart_item), 1)
         self.assertEqual(shopcart_item[0].name, "soap")
+
 
     def test_update_a_shopcart_item_without_id(self):
         """ Update a shopcart item """
@@ -547,6 +605,16 @@ class TestShopcartItems(unittest.TestCase):
         """ Find Shopcart Items by empty Shopcart """
         item_queried = ShopcartItem.find_by_shopcartid(10)
         self.assertEqual(len(item_queried),0)
+    
+    def test_find_by_sku_and_sid(self):
+        """ Find Shopcart Items by shopcart id and sku id  """
+        shopcart = Shopcart().deserialize({"user_id": 12345})
+        shopcart.create()
+        sku = 3
+        ShopcartItem(id=1, sid=shopcart.id, sku=3, name="obj 1", price=8, amount=5).create()
+        ShopcartItem(id=6, sid=shopcart.id, sku=3, name="obj 1", price=8, amount=9).create()
+        items_queried = ShopcartItem.find_by_sku_and_sid(sku,shopcart.id)
+        self.assertEqual(len(items_queried), 2)
 
 
 ######################################################################

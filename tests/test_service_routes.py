@@ -318,22 +318,25 @@ class TestShopcartServer(TestCase):
     def _create_shopcart_items(self, count, sid=None):
         """ Factory method to create shopcart_items in bulk """
         shopcart_items = []
-        for _ in range(count):
+        items = []
+        while len(shopcart_items) < count:
 
             test_shopcart_item = ShopcartItemFactory()
-            if sid is not None:
-                test_shopcart_item.sid = sid
+            if test_shopcart_item.sku not in items:
+                items.append(test_shopcart_item.sku)
+                if sid is not None:
+                    test_shopcart_item.sid = sid
 
-            resp = self.app.post(
-            "/shopcarts/{}/items".format(sid), json=test_shopcart_item.serialize(),
-                content_type="application/json"
-            )
-            self.assertEqual(
-                resp.status_code, status.HTTP_201_CREATED, "Could not create test shopcart item"
-            )
-            new_shopcart_item = resp.get_json()
-            test_shopcart_item.id = new_shopcart_item["id"]
-            shopcart_items.append(test_shopcart_item)
+                resp = self.app.post(
+                "/shopcarts/{}/items".format(sid), json=test_shopcart_item.serialize(),
+                    content_type="application/json"
+                )
+                self.assertEqual(
+                    resp.status_code, status.HTTP_201_CREATED, "Could not create test shopcart item"
+                )
+                new_shopcart_item = resp.get_json()
+                test_shopcart_item.id = new_shopcart_item["id"]
+                shopcart_items.append(test_shopcart_item)
         return shopcart_items
 
     def test_create_shopcart_item(self):
@@ -401,6 +404,41 @@ class TestShopcartServer(TestCase):
         self.assertIsNotNone(
             new_shopcart_item["update_time"], "Update time not set"
         )
+    
+    def test_create_shopcart_item_with_existing_item(self):
+        """ Add to shopcart item when it already exists in the shopcart """
+
+        test_shopcart = ShopcartFactory()
+        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
+                             content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        test_shopcart_item = ShopcartItemFactory()
+        test_shopcart_item.sid = resp.json["id"]
+        original_amount = test_shopcart_item.amount
+        resp = self.app.post(
+            "/shopcarts/{}/items".format(test_shopcart_item.sid),
+            json=test_shopcart_item.serialize(), content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        # Make sure location header is set
+        updated_shopcart_item = ShopcartItemFactory()
+        updated_shopcart_item.sku = test_shopcart_item.sku
+        updated_shopcart_item.sid = resp.json["id"]
+        updated_amount = original_amount + updated_shopcart_item.amount
+        resp = self.app.post(
+            "/shopcarts/{}/items".format(updated_shopcart_item.sid),
+            json=updated_shopcart_item.serialize(), content_type="application/json"
+        )
+        # check for status code
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        # check for updated amount 
+        new_shopcart_item = resp.get_json()
+        self.assertEqual(
+            new_shopcart_item["amount"], updated_amount, "Amounts do not match"
+        )
+        
+
+
 
     def test_update_shopcart_item(self):
         """ Update an existing shopcart item """

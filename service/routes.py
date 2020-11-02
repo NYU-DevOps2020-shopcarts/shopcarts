@@ -241,10 +241,11 @@ def create_shopcart_items(shopcart_id):
     """
     logger.info("Request to create a shopcart item")
     check_content_type("application/json")
+
     shopcart_item = ShopcartItem()
     shopcart_item.deserialize(request.get_json())
     shopcart_item.sid = shopcart_id
-    shopcart_item.create()
+    shopcart_item.add()
     message = shopcart_item.serialize()
     location_url = url_for("get_shopcart_item",
                             shopcart_id=shopcart_item.sid, item_id=shopcart_item.id, _external=True)

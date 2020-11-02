@@ -239,6 +239,30 @@ class ShopcartItem(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def add(self):
+        """
+        Adds an item to shopcart database. If this item already exists in then it updates it in the database
+        """
+
+        shopcart = Shopcart().find(self.sid)
+        if shopcart is None:
+            raise DataValidationError("Invalid shopcart id: shopcart doesn't exist")
+        date_time = datetime.now()
+        shopcart_item_list = ShopcartItem().find_by_sku_and_sid(self.sku, self.sid)
+        if shopcart_item_list:
+            shopcart_item = shopcart_item_list[0]
+            self.amount = shopcart_item.amount + self.amount
+            self.update_time = date_time
+        else:
+            self.id = None
+            self.create_time = date_time
+            self.update_time = date_time
+            db.session.add(self)
+
+        db.session.commit()
+
+
+
     def update(self):
         """
         Updates a ShopcartItem to the database
@@ -402,3 +426,9 @@ class ShopcartItem(db.Model):
         """ Finds a items in a shopcart based on the shopcart item id provided """
         cls.logger.info("Processing lookup for shopcart item id %s ...", item_id)
         return cls.query.get(item_id)
+
+    @classmethod
+    def find_by_sku_and_sid(cls, sku, sid):
+        """ Finds a items in a shopcart based on the shopcart id and sku id provided """
+        cls.logger.info("Processing lookup for shopcart item with sku" +str(sku)+" and sid="+str(sid))
+        return cls.query.filter_by(sid=sid).filter_by(sku=sku).all()

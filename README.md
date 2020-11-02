@@ -117,7 +117,7 @@ A shopcart item can be created with a `POST` request on `/shopcarts/:id/items'` 
     "update_time": null
 }
 ```
-On success the response code is 201 and the newly created shopcart or shopcart item will be contained in the response in JSON format. The location header of the response will contain the id of the newly created shopcart, for example `/shopcarts/1`, or for a shopcart item, `/shopcartitems/1`.
+On success the response code is 201 and the newly created shopcart or shopcart item will be contained in the response in JSON format. The location header of the response will contain the id of the newly created shopcart, for example `/shopcarts/1`, or for a shopcart item, `/shopcartitems/1`. If an item is already present in a shopcart, the `POST` api will update the count of the item present in the cart.  
 
 ## Getting the items in a shopcart
 To get the list of items in a shopcart, you can hit a `GET` request with the id of the shopcart you are looking for. 
