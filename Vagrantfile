@@ -1,6 +1,17 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# WARNING: You will need the following plugin:
+# vagrant plugin install vagrant-docker-compose
+if Vagrant.plugins_enabled?
+  unless Vagrant.has_plugin?('vagrant-docker-compose')
+    puts 'Plugin missing.'
+    system('vagrant plugin install vagrant-docker-compose')
+    puts 'Dependencies installed, please try the command again.'
+    exit
+  end
+end
+
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -75,4 +86,32 @@ Vagrant.configure(2) do |config|
        args: "-d --name postgres -p 5432:5432 -v psql_data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=postgres"
   end
 
+  ############################################################
+  # Add Docker compose
+  ############################################################
+  config.vm.provision :docker_compose
+  # config.vm.provision :docker_compose,
+  #   yml: "/vagrant/docker-compose.yml",
+  #   rebuild: true,
+  #   run: "always"
+
+  ######################################################################
+  # Setup a Bluemix environment
+  ######################################################################
+  config.vm.provision "shell", inline: <<-SHELL
+    echo "\n************************************"
+    echo " Installing IBM Cloud CLI..."
+    echo "************************************\n"
+    # Install IBM Cloud CLI as Vagrant user
+    sudo -H -u vagrant sh -c 'curl -sL http://ibm.biz/idt-installer | bash'
+    sudo -H -u vagrant sh -c "echo 'source <(kubectl completion bash)' >> ~/.bashrc"
+    sudo -H -u vagrant sh -c "ibmcloud cf install --version 6.46.1"
+    sudo -H -u vagrant sh -c "echo alias ic=/usr/local/bin/ibmcloud >> ~/.bash_aliases"
+    echo "\n"
+    echo "If you have an IBM Cloud API key in ~/.bluemix/apiKey.json"
+    echo "You can login with the following command:"
+    echo "\n"
+    echo "ibmcloud login -a https://cloud.ibm.com --apikey @~/.bluemix/apiKey.json -r us-south"
+    echo "\n"
+  SHELL
 end
