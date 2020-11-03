@@ -51,6 +51,7 @@ class TestShopcarts(unittest.TestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+        db.engine.dispose()
 
     # def test_repr(self):
     #     shopcart = Shopcart(id = 1).__repr__
@@ -253,6 +254,7 @@ class TestShopcartItems(unittest.TestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+        db.engine.dispose()
 
     def test_create_a_shopcart_item(self):
         """ Create a ShopcartItem and assert that it exists """
