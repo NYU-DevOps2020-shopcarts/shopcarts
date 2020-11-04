@@ -37,6 +37,7 @@ class TestShopcarts(unittest.TestCase):
         app.debug = False
         # Set up the test database
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+        Shopcart.init_db(app)
 
     @classmethod
     def tearDownClass(cls):
@@ -44,14 +45,12 @@ class TestShopcarts(unittest.TestCase):
         pass
 
     def setUp(self):
-        Shopcart.init_db(app)
         db.drop_all()  # clean up the last tests
         db.create_all()  # make our sqlalchemy tables
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
-        db.engine.dispose()
 
     # def test_repr(self):
     #     shopcart = Shopcart(id = 1).__repr__
@@ -240,6 +239,7 @@ class TestShopcartItems(unittest.TestCase):
         app.debug = False
         # Set up the test database
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+        ShopcartItem.init_db(app)
 
     @classmethod
     def tearDownClass(cls):
@@ -247,14 +247,12 @@ class TestShopcartItems(unittest.TestCase):
         pass
 
     def setUp(self):
-        ShopcartItem.init_db(app)
         db.drop_all()  # clean up the last tests
         db.create_all()  # make our sqlalchemy tables
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
-        db.engine.dispose()
 
     def test_create_a_shopcart_item(self):
         """ Create a ShopcartItem and assert that it exists """
