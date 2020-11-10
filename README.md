@@ -76,6 +76,12 @@ You can also manually run `nosetests` with `coverage` (but `setup.cfg` does this
     $ nosetests --with-coverage --cover-package=service
 ```
 
+### Behave
+Run BDD tests using `behave`
+```shell
+    $ behave
+```
+
 ## Logging Services
 
 Logging is set up to track events.
