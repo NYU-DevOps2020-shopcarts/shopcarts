@@ -243,7 +243,7 @@ class ShopcartItem(db.Model):
         """
         Adds an item to shopcart database. If this item already exists in then it updates it in the database
         """
-
+        
         shopcart = Shopcart().find(self.sid)
         if shopcart is None:
             raise DataValidationError("Invalid shopcart id: shopcart doesn't exist")
@@ -251,7 +251,9 @@ class ShopcartItem(db.Model):
         shopcart_item_list = ShopcartItem().find_by_sku_and_sid(self.sku, self.sid)
         if shopcart_item_list:
             shopcart_item = shopcart_item_list[0]
+            self.id = shopcart_item.id
             self.amount = shopcart_item.amount + self.amount
+            shopcart_item.amount = self.amount
             self.update_time = date_time
         else:
             self.id = None
