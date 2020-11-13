@@ -129,10 +129,7 @@ def healthcheck():
 @app.route('/')
 def index():
     """ Root URL response """
-    data = '{id: <string>, user_id: <string>}'
-    url = request.base_url + 'shopcarts'  # url_for('shopcarts')
-    return jsonify(name='Shopcart Demo REST API Service', version='1.0',
-                   url=url, data=data), status.HTTP_200_OK
+    return app.send_static_file('index.html')
 
 ######################################################################
 # ADD A NEW SHOPCART
