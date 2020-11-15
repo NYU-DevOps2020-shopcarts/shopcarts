@@ -64,7 +64,7 @@ class TestShopcartServer(TestCase):
         """ Test the index page """
         resp = self.app.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertIn(b'ShopCart Demo REST API Service', resp.data)
+        self.assertIn(b'ShopCart Demo RESTful API Service', resp.data)
 
     def test_healthcheck(self):
         """ Healthcheck Test """

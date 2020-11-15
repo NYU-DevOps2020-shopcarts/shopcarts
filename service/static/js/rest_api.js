@@ -6,7 +6,7 @@ $(function () {
     // Updates the form with data from the response
     function shopcart_update_form_data(res) {
         $("#shopcart_id").val(res.id);
-        $("#user_id").val(res.user_id);
+        $("#shopcart_user").val(res.user_id);
         $("#items_shopcart_id").val(res.id);
     }
 
@@ -34,8 +34,8 @@ $(function () {
     // Create a Shopcart
     // ****************************************
 
-    $("#create-btn").click(function () {
-        var user_id = $("#user_id").val();
+    $("#shopcart_create-btn").click(function () {
+        var user_id = $("#shopcart_user").val();
 
         if (user_id === "") {
             return
@@ -126,7 +126,7 @@ $(function () {
     // ****************************************
 
     $("#shopcart_search-btn").click(function () {
-        var user_id = $("#user_id").val();
+        var user_id = $("#shopcart_user").val();
 
         if (user_id === "") {
             return
@@ -161,7 +161,7 @@ $(function () {
         });
     });
 
-    $("#list-btn").click(function () {
+    $("#shopcart_list-btn").click(function () {
         var ajax = $.ajax({
             type: "GET",
             url: "/shopcarts",
@@ -185,7 +185,7 @@ $(function () {
         });
     });
 
-    $("#clear-btn").click(function () {
+    $("#shopcart_clear-btn").click(function () {
         $("#shopcart_search_results").empty()
     })
 

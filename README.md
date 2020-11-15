@@ -77,10 +77,28 @@ You can also manually run `nosetests` with `coverage` (but `setup.cfg` does this
 ```
 
 ### Behave
+These tests require the service to be running because unlike the the TDD unit tests that test the code locally, these BDD intagration tests are using Selenium to manipulate a web page on a running server.
 Run BDD tests using `behave`
 ```shell
+    $ honcho start &
     $ behave
 ```
+Note that the `&` runs the server in the background. To stop the server, you must bring it to the foreground and then press `Ctrl+C`
+
+Stop the server with
+```shell
+    $ fg
+    $ <Ctrl+C>
+```
+Alternately you can run the server in another `shell` by opening another terminal window and using `vagrant ssh` to establish a second connection to the VM. You can also suppress all log output in the current shell with this command:
+```shell
+    honcho start 2>&1 > /dev/null &
+```
+or you can supress info logging with this command:
+```shell
+    gunicorn --bind 0.0.0.0 --log-level=error service:app &
+```
+This will suppress the normal `INFO` logging
 
 ## Logging Services
 
