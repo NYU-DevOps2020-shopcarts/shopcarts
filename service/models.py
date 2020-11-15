@@ -44,10 +44,12 @@ from sqlalchemy.sql import func
 # Create the SQLAlchemy object to be initialized later in init_db()
 db = SQLAlchemy()
 
+
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
 
     pass
+
 
 class Shopcart(db.Model):
     """
@@ -80,7 +82,7 @@ class Shopcart(db.Model):
         """
         date_time = datetime.now()
         self.id = None  # id must be none to generate next primary key
-        #if time fields not set, use current time
+        # if time fields not set, use current time
         self.create_time = date_time
         self.update_time = date_time
         db.session.add(self)
@@ -100,7 +102,7 @@ class Shopcart(db.Model):
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
-        #ensure the (optional) time fields are strings
+        # ensure the (optional) time fields are strings
         if isinstance(self.create_time, datetime):
             create_time = datetime.isoformat(self.create_time)
         else:
@@ -126,18 +128,18 @@ class Shopcart(db.Model):
         :return: a reference to self
         :rtype: Shopcart
         """
-        #ensure the (optional) time fields are datetime objs
+        # ensure the (optional) time fields are datetime objs
         try:
             if "create_time" in data and "update_time" in data:
                 if isinstance(data["create_time"], str):
                     data_create_time = datetime.strptime(data["create_time"],
-                                                              '%Y-%m-%dT%H:%M:%S.%f')
+                                                         '%Y-%m-%dT%H:%M:%S.%f')
                 else:
                     data_create_time = data["create_time"]
 
                 if isinstance(data["update_time"], str):
                     data_update_time = datetime.strptime(data["update_time"],
-                                                              '%Y-%m-%dT%H:%M:%S.%f')
+                                                         '%Y-%m-%dT%H:%M:%S.%f')
                 else:
                     data_update_time = data["update_time"]
                 self.create_time = data_create_time
@@ -147,15 +149,18 @@ class Shopcart(db.Model):
                 self.update_time = None
 
             if "id" in data:
-                self.id = data["id"]
+                self.id = int(data["id"])
 
-            self.user_id = data["user_id"]
+            self.user_id = int(data["user_id"])
         except KeyError as error:
             raise DataValidationError("Invalid shopcart: missing " + error.args[0]) from error
         except TypeError as error:
             raise DataValidationError(
                 "Invalid shopcart: body of request contained bad or no data"
             ) from error
+        except ValueError as error:
+            raise DataValidationError("Invalid shopcart: missing body of request contained bad or no data") from error
+
         return self
 
     @classmethod
@@ -184,7 +189,7 @@ class Shopcart(db.Model):
         return cls.query.get(sid)
 
     @classmethod
-    def find_by_user(cls, user_id : int):
+    def find_by_user(cls, user_id: int):
         """ Returns shopcart for a user
             :param user_id: the id of the user to find the shopcart for
             :type user_id: int
@@ -243,7 +248,7 @@ class ShopcartItem(db.Model):
         """
         Adds an item to shopcart database. If this item already exists in then it updates it in the database
         """
-        
+
         shopcart = Shopcart().find(self.sid)
         if shopcart is None:
             raise DataValidationError("Invalid shopcart id: shopcart doesn't exist")
@@ -263,8 +268,6 @@ class ShopcartItem(db.Model):
 
         db.session.commit()
 
-
-
     def update(self):
         """
         Updates a ShopcartItem to the database
@@ -280,7 +283,7 @@ class ShopcartItem(db.Model):
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
-        #ensure the (optional) time fields are strings
+        # ensure the (optional) time fields are strings
         if isinstance(self.create_time, datetime):
             create_time = datetime.isoformat(self.create_time)
         else:
@@ -310,18 +313,18 @@ class ShopcartItem(db.Model):
         :return: a reference to self
         :rtype: ShopcartItem
         """
-        #ensure the (optional) time fields are datetime objs
+        # ensure the (optional) time fields are datetime objs
         try:
             if "create_time" in data and "update_time" in data:
                 if isinstance(data["create_time"], str):
                     data_create_time = datetime.strptime(data["create_time"],
-                                                              '%Y-%m-%dT%H:%M:%S.%f')
+                                                         '%Y-%m-%dT%H:%M:%S.%f')
                 else:
                     data_create_time = data["create_time"]
 
                 if isinstance(data["update_time"], str):
                     data_update_time = datetime.strptime(data["update_time"],
-                                                              '%Y-%m-%dT%H:%M:%S.%f')
+                                                         '%Y-%m-%dT%H:%M:%S.%f')
                 else:
                     data_update_time = data["update_time"]
                 self.create_time = data_create_time
@@ -331,13 +334,13 @@ class ShopcartItem(db.Model):
                 self.update_time = None
 
             if "id" in data:
-                self.id = data["id"]
+                self.id = int(data["id"])
 
-            self.sid = data["sid"]
-            self.sku = data["sku"]
-            self.name = data["name"]
-            self.price = data["price"]
-            self.amount = data["amount"]
+            self.sid = int(data["sid"])
+            self.sku = int(data["sku"])
+            self.name = str(data["name"])
+            self.price = float(data["price"])
+            self.amount = int(data["amount"])
         except KeyError as error:
             raise DataValidationError(
                 "Invalid shopcart item: missing " + error.args[0]
@@ -346,6 +349,8 @@ class ShopcartItem(db.Model):
             raise DataValidationError(
                 "Invalid shopcart item: body of request contained bad or no data"
             ) from error
+        except ValueError as error:
+            raise DataValidationError("Invalid shopcart: missing body of request contained bad or no data") from error
         return self
 
     @classmethod
@@ -368,7 +373,7 @@ class ShopcartItem(db.Model):
         return cls.query.all()
 
     @classmethod
-    def find_by_sku(cls, sku : int):
+    def find_by_sku(cls, sku: int):
         """ Returns all shopcart items by sku
             :param sku: the sku to find the shopcart items for
             :type sku: int
@@ -380,7 +385,7 @@ class ShopcartItem(db.Model):
         return cls.query.filter(cls.sku == sku).all()
 
     @classmethod
-    def find_by_name(cls, name : str):
+    def find_by_name(cls, name: str):
         """ Returns all shopcart items by product name
             :param name: the name of the product to find shopcart items for
             :type sku: string
@@ -392,7 +397,7 @@ class ShopcartItem(db.Model):
         return cls.query.filter(cls.name == name).all()
 
     @classmethod
-    def find_by_price(cls, price : float):
+    def find_by_price(cls, price: float):
         """ Returns all shopcart items by product price
             :param sku: the price to find the shopcart items for
             :type sku: float
@@ -405,7 +410,7 @@ class ShopcartItem(db.Model):
         return cls.query.filter(cls.price == price).all()
 
     @classmethod
-    def find_by_amount(cls, amount : int):
+    def find_by_amount(cls, amount: int):
         """ Returns all shopcart items by amount of a product
             :param sku: the amount to find the shopcart items for
             :type sku: int
@@ -432,5 +437,5 @@ class ShopcartItem(db.Model):
     @classmethod
     def find_by_sku_and_sid(cls, sku, sid):
         """ Finds a items in a shopcart based on the shopcart id and sku id provided """
-        cls.logger.info("Processing lookup for shopcart item with sku" +str(sku)+" and sid="+str(sid))
+        cls.logger.info("Processing lookup for shopcart item with sku" + str(sku) + " and sid=" + str(sid))
         return cls.query.filter_by(sid=sid).filter_by(sku=sku).all()

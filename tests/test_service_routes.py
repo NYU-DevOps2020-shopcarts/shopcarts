@@ -105,18 +105,18 @@ class TestShopcartServer(TestCase):
         # Check the data is correct
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
-        #times set by db
+        # times set by db
         self.assertIsNotNone(new_shopcart["create_time"],
-                        "Creation time not set")
+                             "Creation time not set")
         self.assertIsNotNone(new_shopcart["update_time"],
-                        "Update time not set")
+                             "Update time not set")
 
         # Check that the location header was correct
         resp = self.app.get(location, content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
-        #times set by db
+        # times set by db
         self.assertIsNotNone(
             new_shopcart["create_time"], "Creation time not set"
         )
@@ -137,7 +137,7 @@ class TestShopcartServer(TestCase):
         # Check the data is correct
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
-        #times set by db
+        # times set by db
         self.assertIsNotNone(new_shopcart["create_time"],
                              "Creation time not set")
         self.assertIsNotNone(new_shopcart["update_time"],
@@ -148,7 +148,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart["user_id"], test_shopcart.user_id, "User ids do not match")
-        #times set by db
+        # times set by db
         self.assertIsNotNone(
             new_shopcart["create_time"], "Creation time not set"
         )
@@ -159,26 +159,26 @@ class TestShopcartServer(TestCase):
     def test_non_existing_shopcart(self):
         """ Find a Shopcart by id that doesn't exist """
         shopcart_id = 1
-        response = self.app.get("/shopcarts/"+str(shopcart_id))
+        response = self.app.get("/shopcarts/" + str(shopcart_id), content_type="application/json")
         resp = response.get_json()
         self.assertEqual(resp["status"], status.HTTP_404_NOT_FOUND)
-        self.assertEqual(resp["error"],constants.NOT_FOUND)
+        self.assertEqual(resp["error"], constants.NOT_FOUND)
 
     def test_get_shopcart_with_zero_items(self):
         """ Find a Shopcart by id that has no items """
         shopcart_id = 1
         test_shopcart = ShopcartFactory()
         create_resp = self.app.post(
-            "/shopcarts", json={"id":shopcart_id,"user_id": test_shopcart.user_id},
+            "/shopcarts", json={"id": shopcart_id, "user_id": test_shopcart.user_id},
             content_type="application/json"
         )
         self.assertEqual(create_resp.status_code, status.HTTP_201_CREATED)
-        shopcart_resp = self.app.get("/shopcarts/"+str(shopcart_id))
+        shopcart_resp = self.app.get("/shopcarts/" + str(shopcart_id), content_type="application/json")
         resp = shopcart_resp.get_json()
         self.assertEqual(shopcart_resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp["id"],shopcart_id)
-        self.assertEqual(resp["user_id"],test_shopcart.user_id)
-        self.assertEqual(len(resp["items"]),0)
+        self.assertEqual(resp["id"], shopcart_id)
+        self.assertEqual(resp["user_id"], test_shopcart.user_id)
+        self.assertEqual(len(resp["items"]), 0)
         self.assertIsNotNone(
             resp["create_time"], "Creation time not set"
         )
@@ -186,12 +186,12 @@ class TestShopcartServer(TestCase):
             resp["update_time"], "Update time not set"
         )
 
-    def is_shopcart_item_same(self,shopcart_item1, shopcart_item2):
+    def is_shopcart_item_same(self, shopcart_item1, shopcart_item2):
         """ Compare if Shopcart Items are identical """
         if (shopcart_item1["id"] == shopcart_item2["id"]
-            and shopcart_item1["price"] == shopcart_item2["price"]
-            and shopcart_item1["amount"] == shopcart_item2["amount"]
-            and shopcart_item1["sku"] == shopcart_item2["sku"]) :
+                and shopcart_item1["price"] == shopcart_item2["price"]
+                and shopcart_item1["amount"] == shopcart_item2["amount"]
+                and shopcart_item1["sku"] == shopcart_item2["sku"]):
             return True
 
         return False
@@ -205,12 +205,12 @@ class TestShopcartServer(TestCase):
         count = 5
         shopcart_id = resp.json["id"]
         shopcart_items = self._create_shopcart_items(count, shopcart_id)
-        get_items_response = self.app.get("/shopcarts/" + str(shopcart_id))
+        get_items_response = self.app.get("/shopcarts/" + str(shopcart_id), content_type="application/json")
         self.assertEqual(get_items_response.status_code, status.HTTP_200_OK)
         response = get_items_response.get_json()
-        self.assertEqual(response["id"],shopcart_id)
-        self.assertEqual(response["user_id"],test_shopcart.user_id)
-        self.assertEqual(len(response["items"]),len(shopcart_items))
+        self.assertEqual(response["id"], shopcart_id)
+        self.assertEqual(response["user_id"], test_shopcart.user_id)
+        self.assertEqual(len(response["items"]), len(shopcart_items))
         self.assertIsNotNone(
             response["create_time"], "Creation time not set"
         )
@@ -219,12 +219,12 @@ class TestShopcartServer(TestCase):
         )
         for itr in range(len(shopcart_items)):
             self.assertTrue(self.is_shopcart_item_same(shopcart_items[itr].serialize(),
-            response["items"][itr]))
+                                                       response["items"][itr]))
 
     def test_get_shopcart_list(self):
         """ Get a list of Shopcarts """
         self._create_shopcarts(5)
-        resp = self.app.get("/shopcarts")
+        resp = self.app.get("/shopcarts", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 5)
@@ -234,11 +234,11 @@ class TestShopcartServer(TestCase):
         shopcarts = self._create_shopcarts(10)
         test_user = shopcarts[0].user_id
         user_shopcarts = [shopcart for shopcart in shopcarts if shopcart.user_id == test_user]
-        resp = self.app.get("/shopcarts", query_string="user_id={}".format(test_user))
+        resp = self.app.get("/shopcarts", query_string="user_id={}".format(test_user), content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data =resp.get_json()
+        data = resp.get_json()
         self.assertEqual(len(data), len(user_shopcarts))
-        #check the data
+        # check the data
         for shopcart in data:
             self.assertEqual(shopcart["user_id"], test_user)
 
@@ -275,9 +275,9 @@ class TestShopcartServer(TestCase):
         test_sku = shopcart_items[0].sku
         sku_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.sku == test_sku]
-        resp = self.app.get("/shopcarts/items", query_string="sku={}".format(test_sku))
+        resp = self.app.get("/shopcarts/items", query_string="sku={}".format(test_sku), content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data =resp.get_json()
+        data = resp.get_json()
         self.assertEqual(len(data), len(sku_shopcart_items))
 
         resp = self.app.put(
@@ -328,7 +328,7 @@ class TestShopcartServer(TestCase):
                     test_shopcart_item.sid = sid
 
                 resp = self.app.post(
-                "/shopcarts/{}/items".format(sid), json=test_shopcart_item.serialize(),
+                    "/shopcarts/{}/items".format(sid), json=test_shopcart_item.serialize(),
                     content_type="application/json"
                 )
                 self.assertEqual(
@@ -371,7 +371,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(
             new_shopcart_item["amount"], test_shopcart_item.amount, "Amounts do not match"
         )
-        #times set by db
+        # times set by db
         self.assertIsNotNone(
             new_shopcart_item["create_time"], "Creation time not set"
         )
@@ -397,14 +397,14 @@ class TestShopcartServer(TestCase):
         self.assertEqual(
             new_shopcart_item["amount"], test_shopcart_item.amount, "Amounts do not match"
         )
-        #times set by db
+        # times set by db
         self.assertIsNotNone(
             new_shopcart_item["create_time"], "Creation time not set"
         )
         self.assertIsNotNone(
             new_shopcart_item["update_time"], "Update time not set"
         )
-    
+
     def test_create_shopcart_item_with_existing_item(self):
         """ Add to shopcart item when it already exists in the shopcart """
 
@@ -436,9 +436,6 @@ class TestShopcartServer(TestCase):
         self.assertEqual(
             new_shopcart_item["amount"], updated_amount, "Amounts do not match"
         )
-        
-
-
 
     def test_update_shopcart_item(self):
         """ Update an existing shopcart item """
@@ -474,7 +471,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(updated_shopcart_item["name"], "item_1")
         self.assertEqual(updated_shopcart_item["amount"], 4)
 
-    def test_update_shopcart_item_bad_request(self):
+    def test_update_shopcart_item_not_found(self):
         """ Test update an existing shopcart item with a bad request """
         test_shopcart = ShopcartFactory()
         resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
@@ -501,13 +498,13 @@ class TestShopcartServer(TestCase):
             json=new_shopcart_item,
             content_type="application/json",
         )
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_shopcart_item_with_non_existing_shopcart(self):
         """ Update an item where shopcart doesn't exists """
 
         # create a shopcart item to update
-        new_shopcart_item = { "price":50.00}
+        new_shopcart_item = {"price": 50.00}
         resp = self.app.put(
             "/shopcarts/{}/items/{}".format(1, 1),
             json=new_shopcart_item,
@@ -519,14 +516,14 @@ class TestShopcartServer(TestCase):
         """ Query shopcart item list without any query string """
         test_shopcart = ShopcartFactory()
         resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
-        content_type="application/json")
+                             content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
         count = 10
         shopcart_items = self._create_shopcart_items(count, shopcart_id)
-        resp = self.app.get("/shopcarts/items")
+        resp = self.app.get("/shopcarts/items", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data =resp.get_json()
+        data = resp.get_json()
         self.assertEqual(len(data), count)
 
     def test_query_shopcart_item_list_by_sku(self):
@@ -541,11 +538,11 @@ class TestShopcartServer(TestCase):
         sku_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.sku == test_sku]
         resp = self.app.get("/shopcarts/items",
-                            query_string="sku={}".format(test_sku))
+                            query_string="sku={}".format(test_sku), content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data =resp.get_json()
+        data = resp.get_json()
         self.assertEqual(len(data), len(sku_shopcart_items))
-        #check the data
+        # check the data
         for shopcart_item in data:
             self.assertEqual(shopcart_item["sku"], test_sku)
 
@@ -559,13 +556,13 @@ class TestShopcartServer(TestCase):
         shopcart_items = self._create_shopcart_items(10, shopcart_id)
         test_name = shopcart_items[0].name
         name_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
-                              if shopcart_item.name == test_name]
+                               if shopcart_item.name == test_name]
         resp = self.app.get("/shopcarts/items",
-                            query_string="name={}".format(test_name))
+                            query_string="name={}".format(test_name), content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data =resp.get_json()
+        data = resp.get_json()
         self.assertEqual(len(data), len(name_shopcart_items))
-        #check the data
+        # check the data
         for shopcart_item in data:
             self.assertEqual(shopcart_item["name"], test_name)
 
@@ -579,13 +576,13 @@ class TestShopcartServer(TestCase):
         shopcart_items = self._create_shopcart_items(10, shopcart_id)
         test_price = shopcart_items[0].price
         price_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
-                              if shopcart_item.price == test_price]
+                                if shopcart_item.price == test_price]
         resp = self.app.get("/shopcarts/items",
-                            query_string="price={}".format(test_price))
+                            query_string="price={}".format(test_price), content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data =resp.get_json()
+        data = resp.get_json()
         self.assertEqual(len(data), len(price_shopcart_items))
-        #check the data
+        # check the data
         for shopcart_item in data:
             self.assertEqual(shopcart_item["price"], test_price)
 
@@ -599,13 +596,13 @@ class TestShopcartServer(TestCase):
         shopcart_items = self._create_shopcart_items(10, shopcart_id)
         test_amount = shopcart_items[0].amount
         amount_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
-                              if shopcart_item.amount == test_amount]
+                                 if shopcart_item.amount == test_amount]
         resp = self.app.get("/shopcarts/items",
-                            query_string="amount={}".format(test_amount))
+                            query_string="amount={}".format(test_amount), content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data =resp.get_json()
+        data = resp.get_json()
         self.assertEqual(len(data), len(amount_shopcart_items))
-        #check the data
+        # check the data
         for shopcart_item in data:
             self.assertEqual(shopcart_item["amount"], test_amount)
 
@@ -614,32 +611,18 @@ class TestShopcartServer(TestCase):
         shopcart = self._create_shopcarts(1)
         shopcart_id = shopcart[0].id
         count = 5
-        shopcart_items = self._create_shopcart_items(count,shopcart_id)
-        response = self.app.get("/shopcarts/{}/items/".format(shopcart_id))
+        shopcart_items = self._create_shopcart_items(count, shopcart_id)
+        response = self.app.get("/shopcarts/{}/items/".format(shopcart_id), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         shopcart_items_resp = response.get_json()
-        self.assertTrue(len(shopcart_items)!=0)
+        self.assertTrue(len(shopcart_items) != 0)
         for item in shopcart_items_resp:
-            self.assertEqual(item["sid"],shopcart_id)
+            self.assertEqual(item["sid"], shopcart_id)
 
     def test_get_shopcart_item_not_found(self):
         """ Get a Shopcart Item thats not found """
-        resp = self.app.get("/shopcarts/0/items/0")
+        resp = self.app.get("/shopcarts/0/items/0", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_get_shopcart_item_not_found_bad_request(self):
-        """ Get a Shopcart Item with a bad request """
-        resp = self.app.get("/shopcarts/1/items/0")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_get_shopcart_items_with_zero_items(self):
-        """ Find shopcart items list by shopcart id for shopcart with no items """
-        shopcart_id = 1
-        response = self.app.get("/shopcarts/{}/items/".format(shopcart_id))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        shopcart_items_resp = response.get_json()
-        self.assertEqual(shopcart_items_resp["status"],404)
-        self.assertEqual(shopcart_items_resp["error"],constants.NOT_FOUND)
 
     def test_delete_shopcart_items(self):
         """Delete a Shopcart Item"""

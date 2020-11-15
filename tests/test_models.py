@@ -185,15 +185,21 @@ class TestShopcarts(unittest.TestCase):
         self.assertIsNone(shopcart.create_time)
         self.assertIsNone(shopcart.update_time)
 
-    def test_deserialize__shopcart_bad_data(self):
+    def test_deserialize_shopcart_bad_data(self):
         """ Test deserialization of bad data for a Shopcart """
         data = "this is not a dictionary"
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
 
-    def test_deserialize__shopcart_key_error(self):
-        """ Test deserialization of bad data for a Shopcart """
-        data = {"id":100}
+    def test_deserialize_shopcart_key_error(self):
+        """ Test deserialization of key error for a Shopcart """
+        data = {"id": 100}
+        shopcart = Shopcart()
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+    def test_deserialize_shopcart_value_error(self):
+        """ Test deserialization of value error for a Shopcart """
+        data = {"id": "100d"}
         shopcart = Shopcart()
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
 
@@ -202,10 +208,10 @@ class TestShopcarts(unittest.TestCase):
         date_time = datetime.now()
         date_time_str = datetime.isoformat(date_time)
         data = {"id": 1, "user_id": 120, "create_time": date_time_str, "update_time": date_time_str}
-        Shopcart(id=1,user_id=120,create_time=date_time, update_time=date_time).create()
+        Shopcart(id=1, user_id=120, create_time=date_time, update_time=date_time).create()
         shopcart_queried = Shopcart.find(1)
-        self.assertEqual(data["id"],shopcart_queried.id)
-        self.assertEqual(data["user_id"],shopcart_queried.user_id)
+        self.assertEqual(data["id"], shopcart_queried.id)
+        self.assertEqual(data["user_id"], shopcart_queried.user_id)
 
     def test_find_shopcart_with_non_existing_shopcart(self):
         """ Find a Shopcart that doesn't exist """
@@ -218,10 +224,10 @@ class TestShopcarts(unittest.TestCase):
         itr = 1
         date_time = datetime.now()
         for i in range(count):
-            Shopcart(id=itr,user_id=(itr+1),create_time=date_time, update_time=date_time).create()
-            itr = itr + 1 # generating a random id
+            Shopcart(id=itr, user_id=(itr + 1), create_time=date_time, update_time=date_time).create()
+            itr = itr + 1  # generating a random id
         shopcarts_queried = Shopcart.all()
-        self.assertEqual(len(shopcarts_queried),count)
+        self.assertEqual(len(shopcarts_queried), count)
 
     def test_find_by_user(self):
         """ Find a Shopcart by user """
@@ -229,6 +235,7 @@ class TestShopcarts(unittest.TestCase):
         Shopcart(user_id=201).create()
         shopcarts = Shopcart.find_by_user(101)
         self.assertEqual(shopcarts[0].user_id, 101)
+
 
 class TestShopcartItems(unittest.TestCase):
     """ Test Cases for ShopcartItems """
@@ -258,7 +265,7 @@ class TestShopcartItems(unittest.TestCase):
         """ Create a ShopcartItem and assert that it exists """
         date_time = datetime.now()
         shopcart_item = ShopcartItem(sid=100, sku=5000, name="soap", price=2.23,
-                                    amount=3, create_time=date_time, update_time=date_time)
+                                     amount=3, create_time=date_time, update_time=date_time)
         self.assertTrue(shopcart_item is not None)
         self.assertEqual(shopcart_item.id, None)
         self.assertEqual(shopcart_item.sid, 100)
@@ -280,7 +287,7 @@ class TestShopcartItems(unittest.TestCase):
         self.assertEqual(shopcart.id, 1)
         shopcart_item = ShopcartItem(sid=100, sku=5000, name="soap", price=2.23,
                                      amount=3)
-        self.assertRaises(DataValidationError,shopcart_item.create)
+        self.assertRaises(DataValidationError, shopcart_item.create)
         shopcart_item = ShopcartItem(sid=1, sku=5000, name="soap", price=2.23,
                                      amount=3)
         self.assertTrue(shopcart_item is not None)
@@ -290,7 +297,7 @@ class TestShopcartItems(unittest.TestCase):
         self.assertEqual(shopcart_item.name, "soap")
         self.assertEqual(shopcart_item.price, 2.23)
         self.assertEqual(shopcart_item.amount, 3)
-    
+
     def test_shopcart_item_creation_using_add(self):
         """ Create a shopcart item and add it to the database using add method"""
         shopcarts = Shopcart.all()
@@ -344,9 +351,8 @@ class TestShopcartItems(unittest.TestCase):
         self.assertEqual(shopcart.id, 1)
         shopcart_item = ShopcartItem(sid=1000, sku=5000, name="soap", price=2.23,
                                      amount=3)
-        
-        self.assertRaises(DataValidationError,shopcart_item.add)
 
+        self.assertRaises(DataValidationError, shopcart_item.add)
 
     def test_update_a_shopcart_item(self):
         """ Update a shopcart item """
@@ -355,7 +361,7 @@ class TestShopcartItems(unittest.TestCase):
 
         date_time = datetime.now()
         shopcart_item = ShopcartItem(sid=shopcart.id, sku=5000, name="soap", price=2.23,
-                                    amount=3, create_time=date_time, update_time=date_time)
+                                     amount=3, create_time=date_time, update_time=date_time)
         shopcart_item.create()
         self.assertEqual(shopcart_item.id, 1)
         # Change it an update it
@@ -368,7 +374,6 @@ class TestShopcartItems(unittest.TestCase):
         self.assertEqual(len(shopcart_item), 1)
         self.assertEqual(shopcart_item[0].name, "soap")
 
-
     def test_update_a_shopcart_item_without_id(self):
         """ Update a shopcart item """
         shopcart = Shopcart(user_id=12345)
@@ -376,11 +381,11 @@ class TestShopcartItems(unittest.TestCase):
 
         date_time = datetime.now()
         shopcart_item = ShopcartItem(sid=shopcart.id, sku=5000, name="soap", price=2.23,
-                                    amount=3, create_time=date_time, update_time=date_time)
+                                     amount=3, create_time=date_time, update_time=date_time)
         shopcart_item.create()
         # Change it an update it
         shopcart_item.id = None
-        self.assertRaises(DataValidationError,shopcart_item.update)
+        self.assertRaises(DataValidationError, shopcart_item.update)
 
     def test_delete_a_shopcart_item(self):
         """Delete a shopcart item"""
@@ -397,14 +402,13 @@ class TestShopcartItems(unittest.TestCase):
         shopcart_item.delete()
         self.assertEqual(len(ShopcartItem.all()), 0)
 
-
     def test_serialize_a_shopcart_item(self):
         """ Test serialization of a ShopcartItem """
         date_time = datetime.now()
         date_time_str = datetime.isoformat(date_time)
 
         shopcart_item = ShopcartItem(sid=100, sku=5000, name="soap", price=2.23,
-                                    amount=3, create_time=date_time, update_time=date_time)
+                                     amount=3, create_time=date_time, update_time=date_time)
         data = shopcart_item.serialize()
         self.assertNotEqual(data, None)
         self.assertIn("id", data)
@@ -452,7 +456,7 @@ class TestShopcartItems(unittest.TestCase):
     def test_serialize_a_shopcart_item_no_date(self):
         """ Test serialization of a Shopcart with no date set """
         shopcart_item = ShopcartItem(sid=100, sku=5000, name="soap", price=2.23,
-                            amount=3)
+                                     amount=3)
         data = shopcart_item.serialize()
         self.assertNotEqual(data, None)
         self.assertIn("id", data)
@@ -473,8 +477,8 @@ class TestShopcartItems(unittest.TestCase):
     def test_deserialize_a_shopcart_item(self):
         """ Test deserialization of a ShopcartItem """
         date_time = datetime.now()
-        data = {"id": 1, "sid":202, "sku":101, "name":"printer", "price":101.29,
-                "amount":1, "create_time":date_time, "update_time":date_time}
+        data = {"id": 1, "sid": 202, "sku": 101, "name": "printer", "price": 101.29,
+                "amount": 1, "create_time": date_time, "update_time": date_time}
         shopcart_item = ShopcartItem()
         shopcart_item.deserialize(data)
         self.assertNotEqual(shopcart_item, None)
@@ -491,8 +495,8 @@ class TestShopcartItems(unittest.TestCase):
         """ Test deserialization of a ShopcartItem with date string """
         date_time = datetime.now()
         date_time_str = datetime.isoformat(date_time)
-        data = {"id": 1, "sid":202, "sku":101, "name":"printer", "price":101.29,
-            "amount":1, "create_time":date_time_str, "update_time":date_time_str}
+        data = {"id": 1, "sid": 202, "sku": 101, "name": "printer", "price": 101.29,
+                "amount": 1, "create_time": date_time_str, "update_time": date_time_str}
         shopcart_item = ShopcartItem()
         shopcart_item.deserialize(data)
         self.assertNotEqual(shopcart_item, None)
@@ -507,8 +511,8 @@ class TestShopcartItems(unittest.TestCase):
 
     def test_deserialize_a_shopcart_item_no_date(self):
         """ Test deserialization of a ShopcartItem with no date set """
-        data = {"id": 1, "sid":202, "sku":101, "name":"printer", "price":101.29,
-            "amount":1}
+        data = {"id": 1, "sid": 202, "sku": 101, "name": "printer", "price": 101.29,
+                "amount": 1}
         shopcart_item = ShopcartItem()
         shopcart_item.deserialize(data)
         self.assertNotEqual(shopcart_item, None)
@@ -529,7 +533,13 @@ class TestShopcartItems(unittest.TestCase):
 
     def test_deserialize_shopcart_item_key_error(self):
         """ Test deserialization of bad data with key error for a ShopcartItem """
-        data = {"id":1}
+        data = {"id": 1}
+        shopcart_item = ShopcartItem()
+        self.assertRaises(DataValidationError, shopcart_item.deserialize, data)
+
+    def test_deserialize_shopcart_item_value_error(self):
+        """ Test deserialization of bad data with value error for a ShopcartItem """
+        data = {"id": "1d"}
         shopcart_item = ShopcartItem()
         self.assertRaises(DataValidationError, shopcart_item.deserialize, data)
 
@@ -543,7 +553,7 @@ class TestShopcartItems(unittest.TestCase):
         ShopcartItem(sid=shopcart_2.id, sku=101, name="printer", price=101.29, amount=10).create()
         ShopcartItem(sid=shopcart_1.id, sku=201, name="printer", price=101.29, amount=1).create()
         shopcart_items = ShopcartItem.find_by_sku(101)
-        self.assertEqual(len(shopcart_items),2)
+        self.assertEqual(len(shopcart_items), 2)
         self.assertEqual(shopcart_items[0].sku, 101)
 
     def test_find_by_name(self):
@@ -553,7 +563,7 @@ class TestShopcartItems(unittest.TestCase):
         ShopcartItem(sid=shopcart.id, sku=101, name="printer", price=101.29, amount=1).create()
         ShopcartItem(sid=shopcart.id, sku=201, name="laptop", price=101.29, amount=1).create()
         shopcart_items = ShopcartItem.find_by_name("printer")
-        self.assertEqual(len(shopcart_items),1)
+        self.assertEqual(len(shopcart_items), 1)
         self.assertEqual(shopcart_items[0].name, "printer")
 
     def test_find_by_price(self):
@@ -563,7 +573,7 @@ class TestShopcartItems(unittest.TestCase):
         ShopcartItem(sid=shopcart.id, sku=101, name="printer", price=101.29, amount=1).create()
         ShopcartItem(sid=shopcart.id, sku=201, name="printer", price=99.99, amount=1).create()
         shopcart_items = ShopcartItem.find_by_price(99.99)
-        self.assertEqual(len(shopcart_items),1)
+        self.assertEqual(len(shopcart_items), 1)
         self.assertEqual(shopcart_items[0].price, 99.99)
 
     def test_find_by_amount(self):
@@ -573,12 +583,12 @@ class TestShopcartItems(unittest.TestCase):
         ShopcartItem(sid=shopcart.id, sku=101, name="printer", price=101.29, amount=1).create()
         ShopcartItem(sid=shopcart.id, sku=201, name="printer", price=101.29, amount=10).create()
         shopcart_items = ShopcartItem.find_by_amount(10)
-        self.assertEqual(len(shopcart_items),1)
+        self.assertEqual(len(shopcart_items), 1)
         self.assertEqual(shopcart_items[0].amount, 10)
 
     def test_find_by_shopcart_id(self):
         """ Find Shopcart Items by Shopcart id for Shopcart with single item """
-        shopcart=Shopcart().deserialize({"user_id":12345})
+        shopcart = Shopcart().deserialize({"user_id": 12345})
         shopcart.create()
         data = {"id": 1, "sid": shopcart.id, "sku": 150,
                 "name": "test obj1", "price": 100, "amount": 1}
@@ -604,8 +614,8 @@ class TestShopcartItems(unittest.TestCase):
     def test_find_by_shopcart_id_with_no_items(self):
         """ Find Shopcart Items by empty Shopcart """
         item_queried = ShopcartItem.find_by_shopcartid(10)
-        self.assertEqual(len(item_queried),0)
-    
+        self.assertEqual(len(item_queried), 0)
+
     def test_find_by_sku_and_sid(self):
         """ Find Shopcart Items by shopcart id and sku id  """
         shopcart = Shopcart().deserialize({"user_id": 12345})
@@ -613,7 +623,7 @@ class TestShopcartItems(unittest.TestCase):
         sku = 3
         ShopcartItem(id=1, sid=shopcart.id, sku=3, name="obj 1", price=8, amount=5).create()
         ShopcartItem(id=6, sid=shopcart.id, sku=3, name="obj 1", price=8, amount=9).create()
-        items_queried = ShopcartItem.find_by_sku_and_sid(sku,shopcart.id)
+        items_queried = ShopcartItem.find_by_sku_and_sid(sku, shopcart.id)
         self.assertEqual(len(items_queried), 2)
 
 
