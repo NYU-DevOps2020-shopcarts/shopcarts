@@ -112,6 +112,25 @@ def step_impl(context, message):
      expect(element.text).to_contain(message)
 
 
+@then('I should see "{name}" in the results')
+def step_impl(context, name):
+    # element = context.driver.find_element_by_id(ID_PREFIX + 'search_results')
+    # expect(element.text).to_contain(name)
+    found = WebDriverWait(context.driver, WAIT_SECONDS).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, ID_PREFIX + 'search_results'),
+            name
+        )
+    )
+    expect(found).to_be(True)
+
+
+@then('I should not see "{name}" in the results')
+def step_impl(context, name):
+    element = context.driver.find_element_by_id(ID_PREFIX + 'search_results')
+    error_msg = "I should not see '%s' in '%s'" % (name, element.text)
+    ensure(name in element.text, False, error_msg)
+
 ##################################################################
 # This code works because of the following naming convention:
 # The id field for text input in the html is the element name

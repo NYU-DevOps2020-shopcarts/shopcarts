@@ -27,3 +27,10 @@ Scenario: Create a Shopcart
     When I paste the "Id" field
     And I press the "Retrieve" button
     Then I should see "4" in the "User" field
+
+Scenario: List all shopcarts
+    When I visit the "Home Page"
+    And I press the "List" button
+    Then I should see "1" in the results
+    And I should see "2" in the results
+    And I should not see "500" in the results
