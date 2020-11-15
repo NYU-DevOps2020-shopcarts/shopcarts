@@ -53,7 +53,7 @@ Scenario: Delete a shopcart
     And the "User" field should be empty
     When I paste the "Id" field
     And I press the "Delete" button
-    Then I should see the message "Success"
+    Then I should see the message "Shopcart has been Deleted!"
     When I press the "Retrieve" button
     Then I should see the message "not found"
     When I set the "User" to "1"
