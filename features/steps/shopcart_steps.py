@@ -131,6 +131,7 @@ def step_impl(context, name):
     error_msg = "I should not see '%s' in '%s'" % (name, element.text)
     ensure(name in element.text, False, error_msg)
 
+    
 ##################################################################
 # This code works because of the following naming convention:
 # The id field for text input in the html is the element name

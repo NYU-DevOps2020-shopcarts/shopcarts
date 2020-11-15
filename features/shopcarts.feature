@@ -8,7 +8,7 @@ Background:
         | user       |
         | 1          |
         | 2          |
-        | 3          |
+        | 300        |
 
 Scenario: The server is running
     When I visit the "Home Page"
@@ -34,3 +34,10 @@ Scenario: List all shopcarts
     Then I should see "1" in the results
     And I should see "2" in the results
     And I should not see "500" in the results
+
+Scenario: Query shopcarts
+    When I visit the "Home Page"
+    And I set the "User" to "2"
+    And I press the "Search" button
+    Then I should see "2" in the results
+    And I should not see "300" in the results
