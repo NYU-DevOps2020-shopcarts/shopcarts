@@ -248,3 +248,7 @@ To delete a shopcart item, make a `DELETE` request to `/shopcarts/:id/items/:ite
 ### Place an order from a Shopcart
 
 To place an order, make a `PUT` request to `/shopcarts/:id/place-order`. The shopcart will be deleted after the order is placed.
+
+### Travis CI BDD test cases for each pull request
+
+When a new PR has been created and it passes all the BDD tests, the PR page will indicate the PR is ready for review. WHen it fails one or more BDD test, then the PR page indicates that it is blocked for review.
