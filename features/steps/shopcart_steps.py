@@ -40,6 +40,40 @@ def step_impl(context):
         context.resp = requests.post(create_url, data=payload, headers=headers)
         expect(context.resp.status_code).to_equal(201)
 
+@given('the following items')
+def step_impl(context):
+    """ Delete all shopcart items and load new ones """
+    headers = {'Content-Type': 'application/json'}
+    # list all of the shopcarts and delete their items one by one
+    context.resp = requests.get(context.base_url + '/shopcarts/items', headers=headers)
+    expect(context.resp.status_code).to_equal(200)
+    for item in context.resp.json():
+        context.resp = requests.delete(context.base_url + '/shopcarts/' + str(item["sid"]) +
+                       '/items/' + str(item["id"]), headers=headers)
+        expect(context.resp.status_code).to_equal(204)
+    
+    create_url = context.base_url + '/shopcarts'
+    for row in context.table:
+        # Get the shopcart ID by querying the user ID
+        get_url = create_url + '?user_id=' + str(row['user'])
+        context.resp = requests.get(get_url, headers=headers)
+        expect(context.resp.status_code).to_equal(200)
+        shopcart = context.resp.json()[0]
+        shopcart_id = shopcart["id"]
+
+        # Add the shopcart item data to the appropriate shopcart
+        data = {
+            "sid": shopcart_id,
+            "sku": row['sku'],
+            "name": row['name'],
+            "amount": row['amount'],
+            "price": row['price']
+            }
+        payload = json.dumps(data)
+        item_url = create_url + '/' + str(shopcart_id) + '/items'
+        context.resp = requests.post(item_url, data=payload, headers=headers)
+        expect(context.resp.status_code).to_equal(201)
+
 @when('I visit the "home page"')
 def step_impl(context):
     """ Make a call to the base URL """

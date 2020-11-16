@@ -185,6 +185,41 @@ $(function () {
         });
     });
 
+    $("#shopcart_order-btn").click(function () {
+        var shopcart_id = $("#shopcart_id").val();
+
+        if (shopcart_id === "") {
+            return
+        }
+        //Get the items for this shopcart
+        $.ajax({
+            type: "GET",
+            url: "/shopcarts/" + shopcart_id + "/items",
+            contentType: "application/json",
+            success: function(shopcart_data){
+                // Place order
+                $.ajax({
+                    type: "PUT",
+                    url: "/shopcarts/"+shopcart_id+"/place-order",
+                    contentType: "application/json",
+                    data: shopcart_data,
+                    success: function(res)
+                    {
+                        $("#shopcart_search_results").empty()
+                        $("#shopcart_items_search_results").empty()
+                        flash_message("Order was successfully placed")
+                    },
+                    fail: function(res){
+                        flash_message(res.responseJSON.message)
+                    }
+                });
+            },
+            fail: function(res){
+                flash_message(res.responseJSON.message)
+            }
+        });
+    });
+
     $("#shopcart_clear-btn").click(function () {
         $("#shopcart_search_results").empty()
     })
