@@ -41,6 +41,17 @@ Scenario: List all shopcarts
     And I should see "2" in the results
     And I should not see "500" in the results
 
+Scenario: Read a shopcart
+    When I visit the "Home Page"
+    And I set the "User" to "12"
+    And I press the "Create" button
+    Then I should see the message "Success"
+    When I copy the "Id" field
+    And I press the "Clear" button
+    And I paste the "Id" field
+    And I press the "Retrieve" button
+    Then I should see "12" in the "User" field
+
 Scenario: Query shopcarts
     When I visit the "Home Page"
     And I set the "User" to "2"
