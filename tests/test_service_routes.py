@@ -79,7 +79,8 @@ class TestShopcartServer(TestCase):
     def _create_shopcarts(self, count):
         """ Factory method to create shopcarts in bulk """
         shopcarts = []
-        for _ in range(count):
+        ids = []
+        while len(ids) < count:
             test_shopcart = ShopcartFactory()
             resp = self.app.post(
                 "/shopcarts", json=test_shopcart.serialize(), content_type="application/json"
@@ -89,7 +90,9 @@ class TestShopcartServer(TestCase):
             )
             new_shopcart = resp.get_json()
             test_shopcart.id = new_shopcart["id"]
-            shopcarts.append(test_shopcart)
+            if test_shopcart.id not in ids:
+                ids.append(test_shopcart.id)
+                shopcarts.append(test_shopcart)
         return shopcarts
 
     def test_create_shopcart(self):
@@ -677,7 +680,6 @@ class TestShopcartServer(TestCase):
         resp = self.app.post("/shopcarts", content_type="text/plain")
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
         self.assertIn(b'Unsupported media type', resp.data)
-
 
 ######################################################################
 #  ERROR HANDLER TEST CASES

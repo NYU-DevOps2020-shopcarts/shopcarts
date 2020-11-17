@@ -39,7 +39,6 @@ update_time (DateTime) - the time this product was updated
 import logging
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import func
 
 # Create the SQLAlchemy object to be initialized later in init_db()
 db = SQLAlchemy()
@@ -66,8 +65,9 @@ class Shopcart(db.Model):
     ##################################################
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
-    create_time = db.Column(db.DateTime)
-    update_time = db.Column(db.DateTime)
+    create_time = db.Column(db.DateTime, nullable=False, server_default=str(datetime.utcnow()))
+    update_time = db.Column(db.DateTime, nullable=False, server_default=str(datetime.utcnow()),
+                            server_onupdate=str(datetime.utcnow()))
 
     ##################################################
     # INSTANCE METHODS
@@ -80,11 +80,7 @@ class Shopcart(db.Model):
         """
         Creates a Shopcart to the database
         """
-        date_time = datetime.now()
         self.id = None  # id must be none to generate next primary key
-        # if time fields not set, use current time
-        self.create_time = date_time
-        self.update_time = date_time
         db.session.add(self)
         db.session.commit()
 
@@ -102,22 +98,11 @@ class Shopcart(db.Model):
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
-        # ensure the (optional) time fields are strings
-        if isinstance(self.create_time, datetime):
-            create_time = datetime.isoformat(self.create_time)
-        else:
-            create_time = self.create_time
-
-        if isinstance(self.update_time, datetime):
-            update_time = datetime.isoformat(self.update_time)
-        else:
-            update_time = self.update_time
-
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "create_time": create_time,
-            "update_time": update_time,
+            "create_time": str(self.create_time),
+            "update_time": str(self.update_time),
         }
 
     def deserialize(self, data: dict):
@@ -128,29 +113,7 @@ class Shopcart(db.Model):
         :return: a reference to self
         :rtype: Shopcart
         """
-        # ensure the (optional) time fields are datetime objs
         try:
-            if "create_time" in data and "update_time" in data:
-                if isinstance(data["create_time"], str):
-                    data_create_time = datetime.strptime(data["create_time"],
-                                                         '%Y-%m-%dT%H:%M:%S.%f')
-                else:
-                    data_create_time = data["create_time"]
-
-                if isinstance(data["update_time"], str):
-                    data_update_time = datetime.strptime(data["update_time"],
-                                                         '%Y-%m-%dT%H:%M:%S.%f')
-                else:
-                    data_update_time = data["update_time"]
-                self.create_time = data_create_time
-                self.update_time = data_update_time
-            else:
-                self.create_time = None
-                self.update_time = None
-
-            if "id" in data:
-                self.id = int(data["id"])
-
             self.user_id = int(data["user_id"])
         except KeyError as error:
             raise DataValidationError("Invalid shopcart: missing " + error.args[0]) from error
@@ -219,9 +182,10 @@ class ShopcartItem(db.Model):
     sku = db.Column(db.Integer)
     name = db.Column(db.String)
     price = db.Column(db.Float)
-    amount = db.Column(db.Integer)
-    create_time = db.Column(db.DateTime, server_default=func.now())
-    update_time = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
+    amount = db.Column(db.Float)
+    create_time = db.Column(db.DateTime, nullable=False, server_default=str(datetime.utcnow()))
+    update_time = db.Column(db.DateTime, nullable=False, server_default=str(datetime.utcnow()),
+                            server_onupdate=str(datetime.utcnow()))
 
     ##################################################
     # INSTANCE METHODS
@@ -237,10 +201,7 @@ class ShopcartItem(db.Model):
         shopcart = Shopcart().find(self.sid)
         if shopcart is None:
             raise DataValidationError("Invalid shopcart id: shopcart doesn't exist")
-        date_time = datetime.now()
         self.id = None  # id must be none to generate next primary key
-        self.create_time = date_time
-        self.update_time = date_time
         db.session.add(self)
         db.session.commit()
 
@@ -252,18 +213,14 @@ class ShopcartItem(db.Model):
         shopcart = Shopcart().find(self.sid)
         if shopcart is None:
             raise DataValidationError("Invalid shopcart id: shopcart doesn't exist")
-        date_time = datetime.now()
         shopcart_item_list = ShopcartItem().find_by_sku_and_sid(self.sku, self.sid)
         if shopcart_item_list:
             shopcart_item = shopcart_item_list[0]
             self.id = shopcart_item.id
             self.amount = shopcart_item.amount + self.amount
             shopcart_item.amount = self.amount
-            self.update_time = date_time
         else:
             self.id = None
-            self.create_time = date_time
-            self.update_time = date_time
             db.session.add(self)
 
         db.session.commit()
@@ -283,17 +240,6 @@ class ShopcartItem(db.Model):
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
-        # ensure the (optional) time fields are strings
-        if isinstance(self.create_time, datetime):
-            create_time = datetime.isoformat(self.create_time)
-        else:
-            create_time = self.create_time
-
-        if isinstance(self.update_time, datetime):
-            update_time = datetime.isoformat(self.update_time)
-        else:
-            update_time = self.update_time
-
         return {
             "id": self.id,
             "sid": self.sid,
@@ -301,8 +247,8 @@ class ShopcartItem(db.Model):
             "name": self.name,
             "price": self.price,
             "amount": self.amount,
-            "create_time": create_time,
-            "update_time": update_time,
+            "create_time": str(self.create_time),
+            "update_time": str(self.update_time),
         }
 
     def deserialize(self, data: dict):
@@ -313,26 +259,7 @@ class ShopcartItem(db.Model):
         :return: a reference to self
         :rtype: ShopcartItem
         """
-        # ensure the (optional) time fields are datetime objs
         try:
-            if "create_time" in data and "update_time" in data:
-                if isinstance(data["create_time"], str):
-                    data_create_time = datetime.strptime(data["create_time"],
-                                                         '%Y-%m-%dT%H:%M:%S.%f')
-                else:
-                    data_create_time = data["create_time"]
-
-                if isinstance(data["update_time"], str):
-                    data_update_time = datetime.strptime(data["update_time"],
-                                                         '%Y-%m-%dT%H:%M:%S.%f')
-                else:
-                    data_update_time = data["update_time"]
-                self.create_time = data_create_time
-                self.update_time = data_update_time
-            else:
-                self.create_time = None
-                self.update_time = None
-
             if "id" in data:
                 self.id = int(data["id"])
 
@@ -340,7 +267,9 @@ class ShopcartItem(db.Model):
             self.sku = int(data["sku"])
             self.name = str(data["name"])
             self.price = float(data["price"])
-            self.amount = int(data["amount"])
+            self.amount = float(data["amount"])
+            if self.price < 0 or self.amount <= 0:
+                raise ValueError
         except KeyError as error:
             raise DataValidationError(
                 "Invalid shopcart item: missing " + error.args[0]

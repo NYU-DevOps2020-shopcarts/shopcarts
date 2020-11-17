@@ -143,16 +143,16 @@ def create_shopcarts():
     logger.info("Request to create a shopcart")
     check_content_type("application/json")
 
-    data = request.get_json()
-
     shopcart = None
 
+    data = request.get_json()
     if 'user_id' in data:
         shopcart = Shopcart.find_by_user(data['user_id']).first()
 
     if shopcart is None:
         shopcart = Shopcart()
-
+        if "id" in data:
+            data.pop("id")
         shopcart.deserialize(data)
         shopcart.create()
 
@@ -252,6 +252,8 @@ def create_shopcart_items(shopcart_id):
 
     shopcart_item = ShopcartItem()
     data = request.get_json()
+    if "id" in data:
+        data.pop("id")
     data["sid"] = shopcart_id
     shopcart_item.deserialize(data)
     shopcart_item.add()
