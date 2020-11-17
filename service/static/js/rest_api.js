@@ -7,7 +7,7 @@ $(function () {
     function shopcart_update_form_data(res) {
         $("#shopcart_id").val(res.id);
         $("#shopcart_user").val(res.user_id);
-        $("#items_shopcart_id").val(res.id);
+        $("#item_shopcart_id").val(res.id);
     }
 
     // Updates the flash message area
@@ -207,7 +207,7 @@ $(function () {
                     success: function(res)
                     {
                         $("#shopcart_search_results").empty()
-                        $("#shopcart_items_search_results").empty()
+                        $("#item_search_results").empty()
                         flash_message("Order was successfully placed")
                     },
                     fail: function(res){
@@ -227,16 +227,16 @@ $(function () {
 
     // Updates the form with data from the response
     function shopcart_item_update_form_data(res) {
-        $("#items_shopcart_id").val(res.sid);
-        $("#shopcart_item_id").val(res.id);
-        $("#product_id").val(res.sku);
-        $("#product_name").val(res.name);
-        $("#product_amount").val(res.amount);
-        $("#product_price").val(res.price);
+        $("#item_shopcart_id").val(res.sid);
+        $("#item_id").val(res.id);
+        $("#item_product_id").val(res.sku);
+        $("#item_name").val(res.name);
+        $("#item_amount").val(res.amount);
+        $("#item_price").val(res.price);
     }
 
     function add_results_in_table_for_items(res){
-        $("#shopcart_items_search_results").empty();
+        $("#item_search_results").empty();
 
         var firstShopcartItem;
 
@@ -249,7 +249,7 @@ $(function () {
                 "<td>"+shopcart_item.price+"</td>"+
                 "<td>"+shopcart_item.amount+"</td>"+
                 "<td></td></tr>";
-            $("#shopcart_items_search_results").append(row);
+            $("#item_search_results").append(row);
             if (i === 0) {
                 firstShopcartItem = shopcart_item;
             }
@@ -258,12 +258,12 @@ $(function () {
         return firstShopcartItem
     }
 
-    $("#create-btn-items").click(function () {
-        var shopcart_id = parseInt($("#items_shopcart_id").val());
-        var sku = parseInt($("#product_id").val());
-        var name = $("#product_name").val();
-        var price = parseFloat($("#product_price").val());
-        var amount = parseInt($("#product_amount").val());
+    $("#item_create-btn").click(function () {
+        var shopcart_id = parseInt($("#item_shopcart_id").val());
+        var sku = parseInt($("#item_product_id").val());
+        var name = $("#item_name").val();
+        var price = parseFloat($("#item_price").val());
+        var amount = parseInt($("#item_amount").val());
 
         if (shopcart_id === "" || sku === "" || name === "" || price === "" || amount === "") {
             return
@@ -291,18 +291,18 @@ $(function () {
         });
 
         ajax.fail(function(res){
-            $("#shopcart_items_search_results").empty()
+            $("#item_search_results").empty()
             flash_message(res.responseJSON.message)
         });
     });
 
-    $("#update-btn-items").click(function () {
-        var shopcart_id = parseInt($("#items_shopcart_id").val());
-        var shopcart_item_id = parseInt($("#shopcart_item_id").val())
-        var sku = parseInt($("#product_id").val());
-        var name = $("#product_name").val();
-        var price = parseFloat($("#product_price").val());
-        var amount = parseInt($("#product_amount").val());
+    $("#item_update-btn").click(function () {
+        var shopcart_id = parseInt($("#item_shopcart_id").val());
+        var shopcart_item_id = parseInt($("#item_id").val())
+        var sku = parseInt($("#item_product_id").val());
+        var name = $("#item_name").val();
+        var price = parseFloat($("#item_price").val());
+        var amount = parseInt($("#item_amount").val());
 
         if (shopcart_id === "" || shopcart_item_id === "" | sku === "" || name === "" || price === "" || amount === "") {
             return
@@ -329,13 +329,13 @@ $(function () {
         });
 
         ajax.fail(function(res){
-            $("#shopcart_items_search_results").empty()
+            $("#item_search_results").empty()
             flash_message(res.responseJSON.message)
         });
     });
 
-    $("#retrieve-btn-items").click(function () {
-        var shopcart_id = $("#items_shopcart_id").val();
+    $("#item_retrieve-btn").click(function () {
+        var shopcart_id = $("#item_shopcart_id").val();
 
         if (shopcart_id === "") {
             return
@@ -356,7 +356,7 @@ $(function () {
         });
 
         ajax.fail(function(res){
-            $("#shopcart_items_search_results").empty()
+            $("#item_search_results").empty()
             flash_message(res.responseJSON.message)
         });
 
@@ -364,10 +364,10 @@ $(function () {
 
     $(".search-btn-items").click(function () {
         var query = $(this).data("query")
-        var sku = $("#product_id").val();
-        var name = $("#product_name").val();
-        var price = $("#product_price").val();
-        var amount = $("#product_amount").val();
+        var sku = $("#item_product_id").val();
+        var name = $("#item_name").val();
+        var price = $("#item_price").val();
+        var amount = $("#item_amount").val();
 
         var queryString = ""
 
@@ -402,14 +402,14 @@ $(function () {
         });
 
         ajax.fail(function(res){
-            $("#shopcart_items_search_results").empty()
+            $("#item_search_results").empty()
             flash_message(res.responseJSON.message)
         });
     });
 
-    $("#shopcart_item_delete-btn").click(function () {
-        var shopcart_id = $("#items_shopcart_id").val();
-        var shopcart_item_id = $("#shopcart_item_id").val()
+    $("#item_delete-btn").click(function () {
+        var shopcart_id = $("#item_shopcart_id").val();
+        var shopcart_item_id = $("#item_id").val()
 
         if (shopcart_id === '' || shopcart_item_id === '') {
             return
@@ -426,12 +426,12 @@ $(function () {
         });
 
         ajax.fail(function(res){
-            $("#shopcart_items_search_results").empty()
+            $("#item_search_results").empty()
             flash_message("Server error!")
         });
     });
 
-    $("#clear-btn-items").click(function () {
-        $("#shopcart_items_search_results").empty()
+    $("#item_clear-btn").click(function () {
+        $("#item_search_results").empty()
     })
 })

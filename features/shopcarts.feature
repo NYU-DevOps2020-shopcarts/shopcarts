@@ -9,12 +9,6 @@ Background:
         | 1          |
         | 2          |
         | 300        |
-    Given the following items
-        | user       | sku  | name    | amount | price  |
-        | 1          | 1000 | item_1  | 2      | 5.75   |
-        | 1          | 3000 | item_3  | 3      | 10.09  |
-        | 2          | 2000 | item_2  | 1      | 59.99  |
-        | 300        | 1000 | item_1  | 5      | 5.75   |
 
 Scenario: The server is running
     When I visit the "Home Page"
@@ -76,18 +70,3 @@ Scenario: Delete a shopcart
     When I set the "User" to "1"
     When I press the "Search" button
     Then I should see the message "Success"
-
-Scenario: Place an order
-    When I visit the "Home Page"
-    And I set the "User" to "2"
-    And I press the "Search" button
-    Then I should see the message "Success"
-    When I copy the "Id" field
-    And I press the "Clear" button
-    Then the "Id" field should be empty
-    And the "User" field should be empty
-    When I paste the "Id" field
-    And I press the "Order" button
-    Then I should see the message "Order was successfully placed"
-    When I press the "Retrieve" button
-    Then I should see the message "not found"

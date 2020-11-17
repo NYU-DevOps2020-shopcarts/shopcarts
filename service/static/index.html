@@ -79,67 +79,67 @@
             <div class="form-horizontal">
                 <form onsubmit="return false;">
                     <div class="form-group">
-                        <label class="control-label col-sm-2" for="items_shopcart_id">ShopCart ID:</label>
+                        <label class="control-label col-sm-2" for="item_shopcart_id">ShopCart ID:</label>
                         <div class="col-sm-4">
-                            <input id="items_shopcart_id" class="form-control" type="number"
+                            <input id="item_shopcart_id" class="form-control" type="number"
                                    placeholder="Enter ID of ShopCart"/>
                         </div>
                         <div class="col-sm-6">
-                            <button id="retrieve-btn-items" class="btn btn-primary">Retrieve</button>
+                            <button id="item_retrieve-btn" class="btn btn-primary">Retrieve</button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-2" for="shopcart_item_id">ShopCartItem ID:</label>
+                        <label class="control-label col-sm-2" for="item_id">ShopCartItem ID:</label>
                         <div class="col-sm-4">
-                            <input id="shopcart_item_id" class="form-control" type="number"
+                            <input id="item_id" class="form-control" type="number"
                                    placeholder="Enter ID of ShopCartItem"/>
                         </div>
                         <div class="col-sm-6">
-                            <button id="shopcart_item_delete-btn" class="btn btn-danger">Delete</button>
+                            <button id="item_delete-btn" class="btn btn-danger">Delete</button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-2" for="product_id">Product ID:</label>
+                        <label class="control-label col-sm-2" for="item_product_id">Product ID:</label>
                         <div class="col-sm-4">
-                            <input id="product_id" class="form-control" type="number" placeholder="Enter Product ID"/>
+                            <input id="item_product_id" class="form-control" type="number" placeholder="Enter Product ID"/>
                         </div>
                         <div class="col-sm-6">
-                            <button id="product_id-retrieve-btn" class="btn btn-primary search-btn-items"
+                            <button id="item_product_id-retrieve-btn" class="btn btn-primary search-btn-items"
                                     data-query="sku">Search
                             </button>
                         </div>
                     </div>
-                    <div class="form-group"><label class="control-label col-sm-2" for="product_name">Name:</label>
+                    <div class="form-group"><label class="control-label col-sm-2" for="item_name">Name:</label>
                         <div class="col-sm-4">
-                            <input id="product_name" class="form-control" type="text" placeholder="Enter Product Name"/>
+                            <input id="item_name" class="form-control" type="text" placeholder="Enter Product Name"/>
                         </div>
                         <div class="col-sm-6">
-                            <button id="product_name-retrieve-btn" class="btn btn-primary search-btn-items"
+                            <button id="item_name-retrieve-btn" class="btn btn-primary search-btn-items"
                                     data-query="name">Search
                             </button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-2" for="product_amount">Amount:</label>
+                        <label class="control-label col-sm-2" for="item_amount">Amount:</label>
                         <div class="col-sm-4">
-                            <input id="product_amount" class="form-control" type="number"
+                            <input id="item_amount" class="form-control" type="number"
                                    placeholder="Enter Amount of Item"/>
                         </div>
                         <div class="col-sm-6">
-                            <button id="product_amount-retrieve-btn" class="btn btn-primary search-btn-items"
+                            <button id="item_amount-retrieve-btn" class="btn btn-primary search-btn-items"
                                     data-query="amount">Search
                             </button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-2" for="product_price">Price:</label>
+                        <label class="control-label col-sm-2" for="item_price">Price:</label>
                         <div class="col-sm-4">
-                            <input id="product_price" class="form-control" type="number" step="0.01"
+                            <input id="item_price" class="form-control" type="number" step="0.01"
                                    placeholder="Enter price of item"/>
                         </div>
                         <div class="col-sm-6">
                             <div>
-                                <button id="product_price-retrieve-btn" class="btn btn-primary search-btn-items"
+                                <button id="item_price-retrieve-btn" class="btn btn-primary search-btn-items"
                                         data-query="price">Search
                                 </button>
                             </div>
@@ -148,9 +148,9 @@
                     <div class="form-group">
                         <div class="col-sm-2"></div>
                         <div class="col-sm-4">
-                            <button id="create-btn-items" class="btn btn-success">Add</button>
-                            <button id="update-btn-items" class="btn btn-success">Update</button>
-                            <button id="clear-btn-items" class="btn btn-danger" type="reset">Clear</button>
+                            <button id="item_create-btn" class="btn btn-success">Add</button>
+                            <button id="item_update-btn" class="btn btn-success">Update</button>
+                            <button id="item_clear-btn" class="btn btn-danger" type="reset">Clear</button>
                         </div>
                     </div>
                 </form>
@@ -172,7 +172,7 @@
                 <th class="col-md-2">Actions</th>
             </tr>
             </thead>
-            <tbody id="shopcart_items_search_results"></tbody>
+            <tbody id="item_search_results"></tbody>
         </table>
     </div>
 
