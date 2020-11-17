@@ -3,13 +3,31 @@
 [![Build Status](https://travis-ci.com/NYU-DevOps2020-shopcarts/shopcarts.svg?branch=master)](https://travis-ci.com/NYU-DevOps2020-shopcarts/shopcarts)
 [![codecov](https://codecov.io/gh/NYU-DevOps2020-shopcarts/shopcarts/branch/master/graph/badge.svg?token=R1VMI8JR4X)](https://codecov.io/gh/NYU-DevOps2020-shopcarts/shopcarts)
 
-The shopcarts resource allows customers to make a collection of products that they want to purchase
+The shopcarts resource allows customers to make a collection of products that they want to purchase.
 
-## Run The Service
-
-### Online demo
+## Online Demo
 
 IBM Cloud Foundry App for this project can be accessed at [here](https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/).
+
+## Prerequisite Installation using Vagrant
+
+The easiest way to use this app is with Vagrant and VirtualBox. If you don't have this software, the first step is to download and install it.
+
+Download [VirtualBox](https://www.virtualbox.org/)
+
+Download [Vagrant](https://www.vagrantup.com/)
+
+Then all you have to do is clone this repo and invoke vagrant:
+
+```shell
+    git clone https://github.com/NYU-DevOps2020-shopcarts/shopcarts.git
+    cd shopcarts
+    vagrant up
+    vagrant ssh
+    cd /vagrant
+```
+
+## Running the Service
 
 ### Development Mode
 
@@ -21,16 +39,46 @@ FLASK_APP=service FLASK_ENV=development flask run -h 0.0.0.0 -p 5000
 
 ### Production Mode
 
-The project uses *honcho* which gets it's commands from the `Procfile`. To start the service in production mode, simply use:
+The project uses *honcho*, which gets its commands from the `Procfile`. To start the service in production mode, simply use:
 
 ```bash
 honcho start
 ```
 
-## models for shopcarts 
+## Manually Running the Tests
+
+### For Unit Test
+
+Run the tests using `nose`
+
+```shell
+    $ nosetests
+```
+
+### For Behavior Test
+
+These tests require the service to be running because, unlike the TDD unit tests that test the code locally, these BDD integration tests are using Selenium to manipulate a web page on a running server.
+
+Run BDD tests using `behave`
+
+```shell
+    $ honcho start &
+    $ behave
+```
+
+Note that the `&` runs the server in the background. To stop the server, you must bring it to the foreground and then press `Ctrl+C`.
+
+Stop the server with
+
+```shell
+    $ fg
+    $ <Ctrl+C>
+```
+
+## Models for Shopcarts 
+
 ### Shopcart
-#### Attributes:
------------
+
 | Name        | Type     | Purpose                              |
 |-------------|----------|--------------------------------------|
 | id          | int      | Primary key for the table            |
@@ -39,8 +87,7 @@ honcho start
 | update_time | datetime | Time when shopcart was last modified |
 
 ### ShopcartItem - Contains product information for an item in a shopcart
-#### Attributes:
------------
+
 | Name        | Type     | Purpose                                              |
 |-------------|----------|------------------------------------------------------|
 | id          | int      | Primary key for the table                            |
@@ -48,207 +95,431 @@ honcho start
 | sku         | int      | Product/Item id                                      |
 | name        | string   | Name of product/item                                 |
 | price       | float    | Price of the product/item                            |
-| amount      | int      | Count of the item in the shopcart                    |
+| amount      | float    | Count of the item in the shopcart                    |
 | create_time | datetime | Time when item was added to the shopcart             |
 | update_time | datetime | Time when the item in the shopcart was last modified |
 
-## Manually running the Tests
-
-Run the tests using `nose`
-
-```shell
-    $ nosetests
-```
-
-Nose is configured via the included `setup.cfg` file to automatically include the flags `--with-spec --spec-color` so that red-green-refactor is meaningful. If you are in a command shell that supports colors, passing tests will be green while failing tests will be red.
-
-Nose is also configured to automatically run the `coverage` tool and you should see a percentage of coverage report at the end of your tests. If you want to see what lines of code were not tested use:
-
-```shell
-    $ coverage report -m
-```
-
-This is particularly useful because it reports the line numbers for the code that is not covered so that you can write more test cases to get higher code coverage.
-
-You can also manually run `nosetests` with `coverage` (but `setup.cfg` does this already)
-
-```shell
-    $ nosetests --with-coverage --cover-package=service
-```
-
-### Behave
-These tests require the service to be running because unlike the the TDD unit tests that test the code locally, these BDD intagration tests are using Selenium to manipulate a web page on a running server.
-Run BDD tests using `behave`
-```shell
-    $ honcho start &
-    $ behave
-```
-Note that the `&` runs the server in the background. To stop the server, you must bring it to the foreground and then press `Ctrl+C`
-
-Stop the server with
-```shell
-    $ fg
-    $ <Ctrl+C>
-```
-Alternately you can run the server in another `shell` by opening another terminal window and using `vagrant ssh` to establish a second connection to the VM. You can also suppress all log output in the current shell with this command:
-```shell
-    honcho start 2>&1 > /dev/null &
-```
-or you can supress info logging with this command:
-```shell
-    gunicorn --bind 0.0.0.0 --log-level=error service:app &
-```
-This will suppress the normal `INFO` logging
-
-## Logging Services
-
-Logging is set up to track events.
-
 ## Routes
-| URL                               | HTTP method | Description                   |
-|-----------------------------------|-------------|-------------------------------|
-| /shopcarts                        | GET         | Get a shopcart list           |
-| /shopcarts                        | POST        | Create a shopcart             |
-| /shopcarts/<:id>                  | DELETE      | Delete a shopcart             |
-| /shopcarts/<:id>/items            | GET         | Get item list from a shopcart |
-| /shopcarts/<:id>/items            | POST        | Create a shopcart item        |
-| /shopcarts/<:id>/items/<item_id>  | PUT         | Update a shopcart item        |
-| /shopcarts/<:id>/items/<item_id>  | DELETE      | Delete a shopcart item        |
-| /shopcarts/<:id>/items/<item_id>  | GET         | Gets a shopcart item          |
-| /shopcarts/items                  | GET         | Get all shopcart items        |
-| /shopcarts/<:id>/place-order      | PUT         | Place an order                |
 
-## Creating a Shopcart or Shopcart Item
-A shopcart can be created with a `POST` request on `'/shopcarts'` with, for example, the required conent including the following parameters:
-```json
-{
-    "id": null,
-    "user_id": 101,
-    "create_time": null,
-    "update_time": null
-}
-```
-A shopcart item can be created with a `POST` request on `/shopcarts/:id/items'`  with required parameters: 
-```json
-{
-    "id": null,
-    "sid": 100,
-    "sku": 5000,
-    "name": "soap",
-    "price": 2.23,
-    "amount": 3,
-    "create_time": null,
-    "update_time": null
-}
-```
-On success the response code is 201 and the newly created shopcart or shopcart item will be contained in the response in JSON format. The location header of the response will contain the id of the newly created shopcart, for example `/shopcarts/1`, or for a shopcart item, `/shopcartitems/1`. If an item is already present in a shopcart, the `POST` api will update the count of the item present in the cart.  
+| URL                            | HTTP method | Description                                         |
+|--------------------------------|-------------|-----------------------------------------------------|
+| /shopcarts                     | GET         | Get a shopcart list, or query by user_id            |
+| /shopcarts                     | POST        | Create a shopcart                                   |
+| /shopcarts/:id                 | GET         | Read a shopcart                                     |
+| /shopcarts/:id                 | DELETE      | Delete a shopcart                                   |
+| /shopcarts/:id/place-order     | PUT         | Place an order                                      |
+| /shopcarts/:id/items           | GET         | Get item list from a shopcart                       |
+| /shopcarts/:id/items           | POST        | Create a shopcart item                              |
+| /shopcarts/:id/items/:item_id  | GET         | Gets a shopcart item                                |
+| /shopcarts/:id/items/:item_id  | PUT         | Update a shopcart item                              |
+| /shopcarts/:id/items/:item_id  | DELETE      | Delete a shopcart item                              |
+| /shopcarts/items               | GET         | Query shopcart items by sku, name, amount, or price |
 
-## Getting the items in a shopcart
-To get the list of items in a shopcart, you can hit a `GET` request with the id of the shopcart you are looking for. 
+## APIs for Shopcart
 
-``` curl --location --request GET 'http://0.0.0.0:5000/shopcartitems/10' ```
+### List
 
-The response will be something like this if
-1. There are items in the shopcart - status code 200
-```json [
-    {
-        "amount": 1,
-        "create_time": "2020-10-18T17:21:44.626229",
-        "id": 1,
-        "name": "hello",
-        "price": 100.0,
-        "sid": 10,
-        "sku": 10,
-        "update_time": "2020-10-18T17:21:44.626229"
-    },
-    {
-        "amount": 1,
-        "create_time": "2020-10-18T17:22:06.844597",
-        "id": 2,
-        "name": "hello2",
-        "price": 100.0,
-        "sid": 10,
-        "sku": 20,
-        "update_time": "2020-10-18T17:22:06.844597"
-    },
-    {
-        "amount": 1,
-        "create_time": "2020-10-18T17:22:14.123710",
-        "id": 3,
-        "name": "hello3",
-        "price": 100.0,
-        "sid": 10,
-        "sku": 30,
-        "update_time": "2020-10-18T17:22:14.123710"
-    }
-]
+#### HTTP Request
+
+`GET /shopcarts`
+
+#### Example Request
+
+```shell
+curl -H 'Content-Type: application/json' \
+     -X GET 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts'
 ```
 
-2. If the shopcart is empty or shopcart is not found 
-   status code 404
-```json 
-{}
-```
-
-## Getting Shopcart list
-A shopcart list can be got with a `GET` request on `'/shopcarts'`. The response will be something like 
+#### Successful Response
 
 ```json
 [
     {
-        "create_time": "2020-10-17T04:17:28.593445",
+        "create_time": "2020-10-30T14:28:31.480436",
         "id": 1,
-        "update_time": "2020-10-17T04:17:28.593445",
+        "update_time": "2020-10-30T14:28:31.480436",
         "user_id": 435345
     },
     {
-        "create_time": "2020-10-17T04:17:29.696271",
+        "create_time": "2020-11-03T14:16:31.372411",
         "id": 2,
-        "update_time": "2020-10-17T04:17:29.696271",
-        "user_id": 435345
+        "update_time": "2020-11-03T14:16:31.372411",
+        "user_id": 444
     },
     {
-        "create_time": "2020-10-17T04:17:30.522651",
+        "create_time": "2020-11-04T22:03:33.159086",
         "id": 3,
-        "update_time": "2020-10-17T04:17:30.522651",
-        "user_id": 435345
+        "update_time": "2020-11-04T22:03:33.159086",
+        "user_id": 333
     }
 ]
 ```
-## Updating a Shopcart Item
-A shopcart item can be updated with a `PUT` request on `'/shopcarts/:id/items/:item_id'`. 
 
-When an authorized user hits a PUT request on '/shopcartitems', the API will return the updated shopcart item with a status code 200. The content for the PUT request would something like this:
+### Create
+
+#### HTTP Request
+
+`POST /shopcarts`
+
+#### Parameters
+
+| Name    | Type |
+|---------|------|
+| user_id | int  |
+
+#### Example Request
+
+```shell
+curl -H 'Content-Type: application/json' \
+     -d '{"user_id": 101}' \
+     -X POST 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts'
+```
+
+#### Successful Response
 
 ```json
 {
-    "amount": 4,
+    "create_time": "2020-11-15T19:36:28.302839",
+    "id": 6,
+    "update_time": "2020-11-15T19:36:28.302839",
+    "user_id": 101
 }
 ```
 
-The response will contain the full shopcart item.
+#### Note
 
-## Querying Shopcarts
-A shopcart can be queried by user with a `GET` request on `/shopcarts` with the user_id set in the query string of the request, for example, `/shopcarts?user_id=100`
-The response will be the shopcart for that user, or 404 if a shopcart does not exist for that user.
+If a shopcart with the associated `user_id` already exists, the API will return the existing shopcart.
 
-Shopcart items can be queried by sku, name, price, or amount with a `GET` request on `/shopcarts/items` with the appropriate field indicated in the query of the request, for example, `/shopcarts/items?sku=1000`
-The response will be a list of shopcart items where the indicated field has the desired value, or 404 if no shopcart items contain a field with that value.
+### Read
 
-## Delete
+#### HTTP Request
 
-### Delete a Shopcart
+`GET /shopcarts/:id`
 
-To delete a shopcart and everything in it, make a `DELETE` request to `/shopcarts/:id`.
+#### Parameters
 
-### Delete a Shopcart Item
+| Name | Type |
+|------|------|
+| id   | int  |
 
-To delete a shopcart item, make a `DELETE` request to `/shopcarts/:id/items/:item_id`.
+#### Example Request
 
-### Place an order from a Shopcart
+```shell
+curl -H 'Content-Type: application/json' \
+     -X GET 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/1'
+```
 
-To place an order, make a `PUT` request to `/shopcarts/:id/place-order`. The shopcart will be deleted after the order is placed.
+#### Successful Response
 
-### Travis CI BDD test cases for each pull request
+```json
+{
+    "create_time": "2020-10-30T14:28:31.480436",
+    "id": 1,
+    "items": [],
+    "update_time": "2020-10-30T14:28:31.480436",
+    "user_id": 435345
+}
+```
 
-When a new PR has been created and it passes all the BDD tests, the PR page will indicate the PR is ready for review. WHen it fails one or more BDD test, then the PR page indicates that it is blocked for review.
+### Delete
+
+#### HTTP Request
+
+`DELETE /shopcarts/:id`
+
+#### Parameters
+
+| Name | Type |
+|------|------|
+| id   | int  |
+
+#### Example Request
+
+```shell
+curl -H 'Content-Type: application/json' \
+     -X DELETE 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/1'
+```
+
+### Query by User ID
+
+#### HTTP Request
+
+`GET /shopcarts?user_id=<user_id>`
+
+#### Parameters
+
+| Name    | Type |
+|---------|------|
+| user_id | int  |
+
+#### Example Request
+
+```shell
+curl -H 'Content-Type: application/json' \
+     -X GET 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts?user_id=333'
+```
+
+#### Successful Response
+
+```json
+{
+    "create_time": "2020-11-04T22:03:33.159086",
+    "id": 3,
+    "update_time": "2020-11-04T22:03:33.159086",
+    "user_id": 333
+}
+```
+
+#### Note
+
+If the shopcart with the associated `user_id` does not exist, the API will return `404 Not Found`.
+
+### Place Order
+
+#### HTTP Request
+
+`PUT /shopcarts/:id/place-order`
+
+#### Parameters
+
+| Name | Type |
+|------|------|
+| id   | int  |
+
+#### Example Request
+
+```shell
+curl -H 'Content-Type: application/json' \
+     -X PUT 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/2/place-order'
+```
+
+## APIs for Shopcart Items
+
+### List
+
+#### HTTP Request
+
+`GET /shopcarts/:id/items`
+
+#### Parameters
+
+| Name | Type |
+|------|------|
+| id   | int  |
+
+#### Example Request
+
+```shell
+curl -L -H 'Content-Type: application/json' \
+     -X GET 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/4/items'
+```
+
+#### Successful Response
+
+```json
+[
+    {
+        "amount": 3,
+        "create_time": "2020-11-06T20:48:07.731641",
+        "id": 4,
+        "name": "soap",
+        "price": 2.23,
+        "sid": 4,
+        "sku": 5001,
+        "update_time": "2020-11-06T20:48:07.731641"
+    },
+    {
+        "amount": 15,
+        "create_time": "2020-11-04T22:33:40.954337",
+        "id": 3,
+        "name": "soap",
+        "price": 2.23,
+        "sid": 4,
+        "sku": 5000,
+        "update_time": "2020-11-15T05:20:19.332832"
+    }
+]
+```
+
+#### Note
+
+If the shopcart is empty, you will receive 404 Not Found.
+
+### Create
+
+#### HTTP Request
+
+`POST /shopcarts/:id/items`
+
+#### Parameters
+
+| Name   | Type   |
+|--------|--------|
+| id     | int    |
+| sku    | int    |
+| name   | string |
+| price  | float  |
+| amount | float  |
+
+#### Example Request
+
+```shell
+curl -L -H 'Content-Type: application/json' \
+     -d '{"sku": 5000, "name": "soap", "price": 2.23, "amount": 3}' \
+     -X POST 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/1/items'
+```
+
+#### Successful Response
+
+```json
+{
+    "amount": 3,
+    "create_time": "2020-11-17T15:52:25.604736",
+    "id": 5,
+    "name": "soap",
+    "price": 2.23,
+    "sid": 1,
+    "sku": 5000,
+    "update_time": "2020-11-17T15:52:25.604736"
+}
+```
+
+#### Note
+
+If an item is already present in a shopcart, the `POST` API will update the count of the item present in the cart. Other attributes will not be changed.
+
+### Read
+
+#### HTTP Request
+
+`GET /shopcarts/:id/items/:item_id`
+
+#### Parameters
+
+| Name    | Type |
+|---------|------|
+| id      | int  |
+| item_id | int  |
+
+#### Example Request
+
+```shell
+curl -L -H 'Content-Type: application/json' \
+     -X GET 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/4/items/3'
+```
+
+#### Successful Response
+
+```json
+{
+    "amount": 3,
+    "create_time": "2020-11-06T20:48:07.731641",
+    "id": 3,
+    "name": "soap",
+    "price": 2.23,
+    "sid": 4,
+    "sku": 5001,
+    "update_time": "2020-11-06T20:48:07.731641"
+}
+```
+
+### Update
+
+#### HTTP Request
+
+`PUT /shopcarts/:id/items/:item_id`
+
+#### Parameters
+
+| Name    | Type   |
+|---------|--------|
+| id      | int    |
+| item_id | int    |
+| sku     | int    |
+| name    | string |
+| price   | float  |
+| amount  | float  |
+
+#### Example Request
+
+```shell
+curl -L -H 'Content-Type: application/json' \
+     -d '{"sku": 5000, "name": "soap", "price": 2.23, "amount": 30}' \
+     -X PUT 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/1/items/5'
+```
+
+#### Successful Response
+
+```json
+{
+    "amount": 30,
+    "create_time": "2020-11-06T20:48:07.731641",
+    "id": 5,
+    "name": "soap",
+    "price": 2.23,
+    "sid": 1,
+    "sku": 5000,
+    "update_time": "2020-11-06T20:48:07.731641"
+}
+```
+
+### Delete
+
+#### HTTP Request
+
+`DELETE /shopcarts/:id/items/:item_id`
+
+#### Parameters
+
+| Name    | Type |
+|---------|------|
+| id      | int  |
+| item_id | int  |
+
+#### Example Request
+
+```shell
+curl -L -H 'Content-Type: application/json' \
+     -X DELETE 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/1/items/5'
+```
+
+### Query
+
+#### HTTP Request
+
+`GET /shopcarts/items`
+
+#### Parameters
+
+Please provide only one of the following parameters:
+
+| Name    | Type   |
+|---------|--------|
+| sku     | int    |
+| name    | string |
+| price   | float  |
+| amount  | float  |
+
+#### Example Request
+
+```shell
+curl -L -H 'Content-Type: application/json' \
+     -X GET 'https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/shopcarts/items?sku=5001'
+```
+
+#### Successful Response
+
+```json
+[
+    {
+        "amount": 3,
+        "create_time": "2020-11-06T20:48:07.731641",
+        "id": 4,
+        "name": "soap",
+        "price": 2.23,
+        "sid": 4,
+        "sku": 5001,
+        "update_time": "2020-11-06T20:48:07.731641"
+    }
+]
+```
