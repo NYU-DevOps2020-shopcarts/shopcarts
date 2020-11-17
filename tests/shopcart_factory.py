@@ -15,7 +15,11 @@ class ShopcartFactory(factory.Factory):
         model = Shopcart
 
     id = factory.Sequence(lambda n: n)
-    user_id = FuzzyChoice(choices=[1, 2, 100, 101, 200, 250, 400])
+    user_id = FuzzyChoice(choices=[1, 2, 3, 4, 5,
+                                   100, 101, 102, 103, 104, 105,
+                                   200, 201, 202, 203, 204, 205,
+                                   300, 301, 302, 303, 304, 305,
+                                   400, 401, 402, 403, 404, 405])
     #create time fields in db
     #create_time = datetime.isoformat(datetime.now())
     #update_time = datetime.isoformat(datetime.now())

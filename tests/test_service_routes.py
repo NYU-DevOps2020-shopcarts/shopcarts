@@ -124,6 +124,25 @@ class TestShopcartServer(TestCase):
             new_shopcart["update_time"], "Update time not set"
         )
 
+    def test_create_duplicated_shopcart(self):
+        """ Create Duplicated Shopcart """
+        test_shopcart = ShopcartFactory()
+
+        # 1st shopcart
+        resp = self.app.post(
+            "/shopcarts", json={'user_id': test_shopcart.user_id}, content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        new_shopcart = resp.get_json()
+
+        # duplicated shopcart
+        resp = self.app.post(
+            "/shopcarts", json={'user_id': test_shopcart.user_id}, content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        duplicated_shopcart = resp.get_json()
+        self.assertEqual(new_shopcart["id"], duplicated_shopcart["id"])
+
     def test_create_shopcart_with_pure_json(self):
         """ Create a new Shopcart with pure JSON """
         test_shopcart = ShopcartFactory()
@@ -223,24 +242,29 @@ class TestShopcartServer(TestCase):
 
     def test_get_shopcart_list(self):
         """ Get a list of Shopcarts """
-        self._create_shopcarts(5)
+        shopcarts = self._create_shopcarts(5)
+        shopcart_ids = set([shopcart.id for shopcart in shopcarts])
         resp = self.app.get("/shopcarts", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(len(data), 5)
+        self.assertEqual(len(data), len(shopcart_ids))
 
     def test_query_shopcart_list_by_user(self):
         """ Query shopcart list by User """
         shopcarts = self._create_shopcarts(10)
-        test_user = shopcarts[0].user_id
-        user_shopcarts = [shopcart for shopcart in shopcarts if shopcart.user_id == test_user]
-        resp = self.app.get("/shopcarts", query_string="user_id={}".format(test_user), content_type="application/json")
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = resp.get_json()
-        self.assertEqual(len(data), len(user_shopcarts))
-        # check the data
-        for shopcart in data:
-            self.assertEqual(shopcart["user_id"], test_user)
+
+        for shopcart in shopcarts:
+            resp = self.app.get("/shopcarts", query_string="user_id={}".format(shopcart.user_id),
+                                content_type="application/json")
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
+            data = resp.get_json()
+            self.assertEqual(shopcart.id, data['id'])
+
+    def test_query_shopcart_list_by_unknown_user(self):
+        """ Query shopcart list by Unknown User """
+        resp = self.app.get("/shopcarts", query_string="user_id={}".format(1234567890),
+                            content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_shopcart(self):
         """Delete a Shopcart and everything in it"""

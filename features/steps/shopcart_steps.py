@@ -58,7 +58,7 @@ def step_impl(context):
         get_url = create_url + '?user_id=' + str(row['user'])
         context.resp = requests.get(get_url, headers=headers)
         expect(context.resp.status_code).to_equal(200)
-        shopcart = context.resp.json()[0]
+        shopcart = context.resp.json()
         shopcart_id = shopcart["id"]
 
         # Add the shopcart item data to the appropriate shopcart

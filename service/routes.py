@@ -143,10 +143,19 @@ def create_shopcarts():
     logger.info("Request to create a shopcart")
     check_content_type("application/json")
 
-    shopcart = Shopcart()
     data = request.get_json()
-    shopcart.deserialize(data)
-    shopcart.create()
+
+    shopcart = None
+
+    if 'user_id' in data:
+        shopcart = Shopcart.find_by_user(data['user_id']).first()
+
+    if shopcart is None:
+        shopcart = Shopcart()
+
+        shopcart.deserialize(data)
+        shopcart.create()
+
     message = shopcart.serialize()
     location_url = url_for("get_shopcart", shopcart_id=shopcart.id, _external=True)
 
@@ -297,14 +306,22 @@ def list_shopcarts():
     user_id = request.args.get("user_id")
     if user_id:
         logger.info('Find by user')
-        shopcarts = Shopcart.find_by_user(user_id)
+        shopcart = Shopcart.find_by_user(user_id).first()
+
+        if shopcart:
+            logger.info('1 Shopcart returned')
+            return make_response(jsonify(shopcart.serialize()), status.HTTP_200_OK)
+
+        else:
+            return not_found("Shopcart with User ID [%s] not found." % user_id)
+
     else:
         logger.info('Find all')
         shopcarts = Shopcart.all()
 
-    results = [shopcart.serialize() for shopcart in shopcarts]
-    logger.info('[%s] Shopcarts returned', len(results))
-    return make_response(jsonify(results), status.HTTP_200_OK)
+        results = [shopcart.serialize() for shopcart in shopcarts]
+        logger.info('[%s] Shopcarts returned', len(results))
+        return make_response(jsonify(results), status.HTTP_200_OK)
 
 
 ######################################################################

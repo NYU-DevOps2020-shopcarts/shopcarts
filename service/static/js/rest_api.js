@@ -18,7 +18,7 @@ $(function () {
     function shopcart_add_results_in_table(res){
         $("#shopcart_search_results").empty();
 
-        var firstShopcart;
+        var firstShopcart = null;
         for(var i = 0; i < res.length; i++) {
             var shopcart = res[i];
             var row = "<tr><td>"+shopcart.id+"</td><td>"+shopcart.user_id+"</td><td>"+shopcart.create_time+"</td><td>"+shopcart.update_time+"</td><td></td></tr>";
@@ -145,7 +145,7 @@ $(function () {
         })
 
         ajax.done(function(res){
-            firstShopcart = shopcart_add_results_in_table(res)
+            firstShopcart = shopcart_add_results_in_table([res])
 
             // copy the first result to the form
             if (firstShopcart !== "") {
@@ -172,7 +172,8 @@ $(function () {
             firstShopcart = shopcart_add_results_in_table(res)
 
             // copy the first result to the form
-            if (firstShopcart !== "") {
+            if (firstShopcart !== null) {
+                console.log(firstShopcart)
                 shopcart_update_form_data(firstShopcart)
             }
 
