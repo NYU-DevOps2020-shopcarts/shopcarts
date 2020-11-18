@@ -168,3 +168,24 @@ Scenario: Delete an item
     When I paste the item "Shopcart Id" field
     And I press the item "Retrieve" button
     Then I should see the message "is empty"
+
+Scenario: Update an item
+    When I visit the "Home Page"
+    And I set the item "Name" to "item_2"
+    And I press the item "Query by Name" button
+    Then I should see "item_2" in the item "Name" field
+    And I should see "59.99" in the item "Price" field
+    When I set the item "Name" to "item_4"
+    And I press the item "Update" button
+    Then I should see the message "Success"
+    When I copy the item "Product Id" field
+    And I press the item "Clear" button
+    And I paste the item "Product Id" field
+    And I press the item "Query by Product Id" button
+    Then I should see "item_4" in the item "Name" field
+    When I copy the item "Shopcart Id" field
+    And I press the item "Clear" button
+    And I paste the item "Shopcart Id" field
+    And I press the item "Retrieve" button
+    Then I should see "item_4" in the item results
+    Then I should not see "item_2" in the item results
