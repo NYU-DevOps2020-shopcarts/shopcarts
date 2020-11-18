@@ -69,6 +69,21 @@ Scenario: Create an item
     Then I should see "1000 item_1 5.75 2" in the item results
     And I should not see "1000 item_1 5.75 1" in the item results
 
+Scenario: List items in a shopcart
+    When I visit the "Home Page"
+    And I set the "User" to "1"
+    And I press the "Search" button
+    Then I should see the message "Success"
+    When I copy the "Id" field
+    And I press the "Clear" button
+    Then the "Id" field should be empty
+    And the "User" field should be empty
+    When I paste the item "Shopcart Id" field
+    And I press the item "Retrieve" button
+    Then I should see the message "Success"
+    And I should see "1000 item_1 5.75 2" in the item results
+    And I should see "3000 item_3 10.09 3" in the item results
+    
 Scenario: Query items by Product Id
     When I visit the "Home Page"
     And I set the item "Product Id" to "1000"
