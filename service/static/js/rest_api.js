@@ -348,11 +348,17 @@ $(function () {
         })
 
         ajax.done(function(res){
-            var firstShopcart = add_results_in_table_for_items(res)
+            if (res.length == 0){
+                $("#item_search_results").empty()
+                flash_message("Shopcart with ID ["+ shopcart_id + "] is empty")
+            }
+            else{
+                var firstShopcart = add_results_in_table_for_items(res)
 
-            shopcart_item_update_form_data(firstShopcart)
+                shopcart_item_update_form_data(firstShopcart)
 
-            flash_message("Success")
+                flash_message("Success")
+            }
         });
 
         ajax.fail(function(res){

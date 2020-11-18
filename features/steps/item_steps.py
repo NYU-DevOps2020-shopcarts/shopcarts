@@ -68,6 +68,13 @@ def step_impl(context, element_name):
     element = context.driver.find_element_by_id(element_id)
     expect(element.get_attribute('value')).to_be(u'')
 
+@then('the item "{element_name}" field should not be empty')
+def step_impl(context, element_name):
+    element_id = ID_PREFIX + element_name.lower()
+    element_id = element_id.replace(" ", "_")
+    element = context.driver.find_element_by_id(element_id)
+    expect(len(element.get_attribute('value')) > 0)
+
 ##################################################################
 # These two function simulate copy and paste
 ##################################################################

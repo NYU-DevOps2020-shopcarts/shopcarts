@@ -68,3 +68,45 @@ Scenario: Create an item
     When I press the item "Retrieve" button
     Then I should see "1000 item_1 5.75 2" in the item results
     And I should not see "1000 item_1 5.75 1" in the item results
+
+Scenario: Delete an item
+    When I visit the "Home Page"
+    And I set the "User" to "1"
+    And I press the "Search" button
+    Then the item "Shopcart Id" field should not be empty
+    When I press the item "Retrieve" button
+    Then I should see the message "Success"
+    When I copy the item "Shopcart Id" field
+    When I press the item "Delete" button
+    Then I should see the message "ShopCart Item has been Deleted!"
+    When I press the item "Clear" button
+    Then the item "Shopcart Id" field should be empty
+    And the item "Id" field should be empty
+    And the item "Product Id" field should be empty
+    And the item "Name" field should be empty
+    And the item "Amount" field should be empty
+    And the item "Price" field should be empty
+    When I paste the item "Shopcart Id" field
+    And I press the item "Retrieve" button
+    Then I should not see "1000 item_1 5.75 1" in the item results
+    And I should not see "1000 item_1 5.75 2" in the item results
+    When I press the item "Clear" button
+    And I press the "Clear" button
+    And I set the "User" to "2"
+    And I press the "Search" button
+    Then the item "Shopcart Id" field should not be empty
+    When I press the item "Retrieve" button
+    Then I should see the message "Success"
+    When I copy the item "Shopcart Id" field
+    When I press the item "Delete" button
+    Then I should see the message "ShopCart Item has been Deleted!"
+    When I press the item "Clear" button
+    Then the item "Shopcart Id" field should be empty
+    And the item "Id" field should be empty
+    And the item "Product Id" field should be empty
+    And the item "Name" field should be empty
+    And the item "Amount" field should be empty
+    And the item "Price" field should be empty
+    When I paste the item "Shopcart Id" field
+    And I press the item "Retrieve" button
+    Then I should see the message "is empty"
