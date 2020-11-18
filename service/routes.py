@@ -285,7 +285,6 @@ def update(shopcart_id, item_id):
         logger.info("Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id)
         return not_found("Shopcart item with id '{}' was not found.".format(item_id))
 
-    shopcart_item = ShopcartItem()
     data = request.get_json()
     data["sid"] = shopcart_id
     data["id"] = item_id

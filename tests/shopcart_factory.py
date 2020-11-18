@@ -20,9 +20,7 @@ class ShopcartFactory(factory.Factory):
                                    200, 201, 202, 203, 204, 205,
                                    300, 301, 302, 303, 304, 305,
                                    400, 401, 402, 403, 404, 405])
-    #create time fields in db
-    #create_time = datetime.isoformat(datetime.now())
-    #update_time = datetime.isoformat(datetime.now())
+
 
 class ShopcartItemFactory(factory.Factory):
     """ Creates fake shopcart items """
@@ -37,11 +35,6 @@ class ShopcartItemFactory(factory.Factory):
     name = FuzzyChoice(choices=["soap", "iron", "microwave", "printer", "boots", "laptop"])
     price = FuzzyChoice(choices=[2.39, 5.99, 20.99, 45.99, 99.98, 100.00, 205.36])
     amount = FuzzyChoice(choices=[1, 2, 3, 5, 10])
-    #create time fields in db
-    create_time = datetime.isoformat(datetime.now())
-    update_time = datetime.isoformat(datetime.now())
-
-
 
 
 if __name__ == "__main__":

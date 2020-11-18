@@ -455,13 +455,15 @@ class TestShopcartItems(unittest.TestCase):
 
     def test_find_by_sku_and_sid(self):
         """ Find Shopcart Items by shopcart id and sku id  """
-        shopcart = Shopcart().deserialize({"user_id": 12345})
-        shopcart.create()
+        shopcart_1 = Shopcart().deserialize({"user_id": 12345})
+        shopcart_1.create()
+        shopcart_2 = Shopcart().deserialize({"user_id": 1235})
+        shopcart_2.create()
         sku = 3
-        ShopcartItem(id=1, sid=shopcart.id, sku=3, name="obj 1", price=8, amount=5).create()
-        ShopcartItem(id=6, sid=shopcart.id, sku=3, name="obj 1", price=8, amount=9).create()
-        items_queried = ShopcartItem.find_by_sku_and_sid(sku, shopcart.id)
-        self.assertEqual(len(items_queried), 2)
+        ShopcartItem(id=1, sid=shopcart_1.id, sku=sku, name="obj 1", price=8, amount=5).create()
+        ShopcartItem(id=6, sid=shopcart_2.id, sku=sku, name="obj 1", price=8, amount=9).create()
+        item_queried = ShopcartItem.find_by_sku_and_sid(sku, shopcart_1.id)
+        self.assertEqual(item_queried.amount, 5)
 
 
 ######################################################################

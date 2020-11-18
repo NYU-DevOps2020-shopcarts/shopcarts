@@ -65,9 +65,11 @@ class Shopcart(db.Model):
     ##################################################
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
-    create_time = db.Column(db.DateTime, nullable=False, server_default=str(datetime.utcnow()))
-    update_time = db.Column(db.DateTime, nullable=False, server_default=str(datetime.utcnow()),
-                            server_onupdate=str(datetime.utcnow()))
+    create_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    update_time = db.Column(db.DateTime,
+                            nullable=False,
+                            default=datetime.utcnow,
+                            onupdate=datetime.utcnow)
 
     ##################################################
     # INSTANCE METHODS
@@ -83,6 +85,7 @@ class Shopcart(db.Model):
         self.id = None  # id must be none to generate next primary key
         db.session.add(self)
         db.session.commit()
+        db.session.refresh(self)
 
     def delete(self):
         """
@@ -122,7 +125,9 @@ class Shopcart(db.Model):
                 "Invalid shopcart: body of request contained bad or no data"
             ) from error
         except ValueError as error:
-            raise DataValidationError("Invalid shopcart: missing body of request contained bad or no data") from error
+            raise DataValidationError(
+                "Invalid shopcart: missing body of request contained bad or no data"
+            ) from error
 
         return self
 
@@ -183,9 +188,11 @@ class ShopcartItem(db.Model):
     name = db.Column(db.String)
     price = db.Column(db.Float)
     amount = db.Column(db.Float)
-    create_time = db.Column(db.DateTime, nullable=False, server_default=str(datetime.utcnow()))
-    update_time = db.Column(db.DateTime, nullable=False, server_default=str(datetime.utcnow()),
-                            server_onupdate=str(datetime.utcnow()))
+    create_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    update_time = db.Column(db.DateTime,
+                            nullable=False,
+                            default=datetime.utcnow,
+                            onupdate=datetime.utcnow)
 
     ##################################################
     # INSTANCE METHODS
@@ -204,26 +211,28 @@ class ShopcartItem(db.Model):
         self.id = None  # id must be none to generate next primary key
         db.session.add(self)
         db.session.commit()
+        db.session.refresh(self)
 
     def add(self):
         """
-        Adds an item to shopcart database. If this item already exists in then it updates it in the database
+        Adds an item to shopcart database.
+        If this item already exists in then it updates it in the database.
         """
 
         shopcart = Shopcart().find(self.sid)
         if shopcart is None:
             raise DataValidationError("Invalid shopcart id: shopcart doesn't exist")
-        shopcart_item_list = ShopcartItem().find_by_sku_and_sid(self.sku, self.sid)
-        if shopcart_item_list:
-            shopcart_item = shopcart_item_list[0]
+        shopcart_item = ShopcartItem().find_by_sku_and_sid(self.sku, self.sid)
+        if shopcart_item:
             self.id = shopcart_item.id
             self.amount = shopcart_item.amount + self.amount
             shopcart_item.amount = self.amount
+            shopcart_item.update()
         else:
             self.id = None
             db.session.add(self)
-
-        db.session.commit()
+            db.session.commit()
+            db.session.refresh(self)
 
     def update(self):
         """
@@ -232,6 +241,7 @@ class ShopcartItem(db.Model):
         if not self.id:
             raise DataValidationError("Update called with empty ID field")
         db.session.commit()
+        db.session.refresh(self)
 
     def delete(self):
         """Removes a ShopcartItem from the data store"""
@@ -279,7 +289,9 @@ class ShopcartItem(db.Model):
                 "Invalid shopcart item: body of request contained bad or no data"
             ) from error
         except ValueError as error:
-            raise DataValidationError("Invalid shopcart: missing body of request contained bad or no data") from error
+            raise DataValidationError(
+                "Invalid shopcart: missing body of request contained bad or no data"
+            ) from error
         return self
 
     @classmethod
@@ -366,5 +378,7 @@ class ShopcartItem(db.Model):
     @classmethod
     def find_by_sku_and_sid(cls, sku, sid):
         """ Finds a items in a shopcart based on the shopcart id and sku id provided """
-        cls.logger.info("Processing lookup for shopcart item with sku" + str(sku) + " and sid=" + str(sid))
-        return cls.query.filter_by(sid=sid).filter_by(sku=sku).all()
+        cls.logger.info(
+            "Processing lookup for shopcart item with sku" + str(sku) + " and sid=" + str(sid)
+        )
+        return cls.query.filter_by(sid=sid).filter_by(sku=sku).first()
