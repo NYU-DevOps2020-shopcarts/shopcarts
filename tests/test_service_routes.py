@@ -83,7 +83,7 @@ class TestShopcartServer(TestCase):
         while len(ids) < count:
             test_shopcart = ShopcartFactory()
             resp = self.app.post(
-                "/shopcarts", json=test_shopcart.serialize(), content_type="application/json"
+                "/api/shopcarts", json=test_shopcart.serialize(), content_type="application/json"
             )
             self.assertEqual(
                 resp.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
@@ -99,7 +99,7 @@ class TestShopcartServer(TestCase):
         """ Create a new Shopcart """
         test_shopcart = ShopcartFactory()
         resp = self.app.post(
-            "/shopcarts", json=test_shopcart.serialize(), content_type="application/json"
+            "/api/shopcarts", json=test_shopcart.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         # Make sure location header is set
@@ -133,14 +133,14 @@ class TestShopcartServer(TestCase):
 
         # 1st shopcart
         resp = self.app.post(
-            "/shopcarts", json={'user_id': test_shopcart.user_id}, content_type="application/json"
+            "/api/shopcarts", json={'user_id': test_shopcart.user_id}, content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         new_shopcart = resp.get_json()
 
         # duplicated shopcart
         resp = self.app.post(
-            "/shopcarts", json={'user_id': test_shopcart.user_id}, content_type="application/json"
+            "/api/shopcarts", json={'user_id': test_shopcart.user_id}, content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         duplicated_shopcart = resp.get_json()
@@ -150,7 +150,7 @@ class TestShopcartServer(TestCase):
         """ Create a new Shopcart with pure JSON """
         test_shopcart = ShopcartFactory()
         resp = self.app.post(
-            "/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json"
+            "/api/shopcarts", json={"user_id": test_shopcart.user_id}, content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         # Make sure location header is set
@@ -191,7 +191,7 @@ class TestShopcartServer(TestCase):
         shopcart_id = 1
         test_shopcart = ShopcartFactory()
         create_resp = self.app.post(
-            "/shopcarts", json={"id": shopcart_id, "user_id": test_shopcart.user_id},
+            "/api/shopcarts", json={"id": shopcart_id, "user_id": test_shopcart.user_id},
             content_type="application/json"
         )
         self.assertEqual(create_resp.status_code, status.HTTP_201_CREATED)
@@ -221,7 +221,7 @@ class TestShopcartServer(TestCase):
     def test_get_shopcart_with_items(self):
         """ Find a Shopcart by id that has multiple items"""
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+        resp = self.app.post("/api/shopcarts", json={"user_id": test_shopcart.user_id},
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         count = 5
@@ -247,7 +247,7 @@ class TestShopcartServer(TestCase):
         """ Get a list of Shopcarts """
         shopcarts = self._create_shopcarts(5)
         shopcart_ids = set([shopcart.id for shopcart in shopcarts])
-        resp = self.app.get("/shopcarts", content_type="application/json")
+        resp = self.app.get("/api/shopcarts")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), len(shopcart_ids))
@@ -257,17 +257,16 @@ class TestShopcartServer(TestCase):
         shopcarts = self._create_shopcarts(10)
 
         for shopcart in shopcarts:
-            resp = self.app.get("/shopcarts", query_string="user_id={}".format(shopcart.user_id),
-                                content_type="application/json")
+            resp = self.app.get("/api/shopcarts", query_string="user_id={}".format(shopcart.user_id))
             self.assertEqual(resp.status_code, status.HTTP_200_OK)
-            data = resp.get_json()
+            data = resp.get_json()[0]
             self.assertEqual(shopcart.id, data['id'])
 
     def test_query_shopcart_list_by_unknown_user(self):
         """ Query shopcart list by Unknown User """
-        resp = self.app.get("/shopcarts", query_string="user_id={}".format(1234567890),
-                            content_type="application/json")
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        resp = self.app.get("/api/shopcarts", query_string="user_id={}".format(1234567890))
+        data = resp.get_json()
+        self.assertEqual(0, len(data))
 
     def test_delete_shopcart(self):
         """Delete a Shopcart and everything in it"""
@@ -294,7 +293,7 @@ class TestShopcartServer(TestCase):
     def test_place_order(self):
         """ Test sending shopcart order """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+        resp = self.app.post("/api/shopcarts", json={"user_id": test_shopcart.user_id},
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
@@ -327,7 +326,7 @@ class TestShopcartServer(TestCase):
 
     def test_place_order_empty_shopcart(self):
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+        resp = self.app.post("/api/shopcarts", json={"user_id": test_shopcart.user_id},
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
@@ -369,7 +368,7 @@ class TestShopcartServer(TestCase):
     def test_create_shopcart_item(self):
         """ Create a new ShopcartItem """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
+        resp = self.app.post("/api/shopcarts", json=test_shopcart.serialize(),
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         test_shopcart_item = ShopcartItemFactory()
@@ -436,7 +435,7 @@ class TestShopcartServer(TestCase):
         """ Add to shopcart item when it already exists in the shopcart """
 
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
+        resp = self.app.post("/api/shopcarts", json=test_shopcart.serialize(),
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         test_shopcart_item = ShopcartItemFactory()
@@ -467,7 +466,7 @@ class TestShopcartServer(TestCase):
     def test_update_shopcart_item(self):
         """ Update an existing shopcart item """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
+        resp = self.app.post("/api/shopcarts", json=test_shopcart.serialize(),
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
@@ -501,7 +500,7 @@ class TestShopcartServer(TestCase):
     def test_update_shopcart_item_not_found(self):
         """ Test update an existing shopcart item with a bad request """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json=test_shopcart.serialize(),
+        resp = self.app.post("/api/shopcarts", json=test_shopcart.serialize(),
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
@@ -542,7 +541,7 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item(self):
         """ Query shopcart item list without any query string """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+        resp = self.app.post("/api/shopcarts", json={"user_id": test_shopcart.user_id},
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
@@ -556,7 +555,7 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item_list_by_sku(self):
         """ Query shopcart item list by sku """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+        resp = self.app.post("/api/shopcarts", json={"user_id": test_shopcart.user_id},
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
@@ -576,7 +575,7 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item_list_by_name(self):
         """ Query shopcart item list by name """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+        resp = self.app.post("/api/shopcarts", json={"user_id": test_shopcart.user_id},
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
@@ -596,7 +595,7 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item_list_by_price(self):
         """ Query shopcart item list by price """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+        resp = self.app.post("/api/shopcarts", json={"user_id": test_shopcart.user_id},
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
@@ -616,7 +615,7 @@ class TestShopcartServer(TestCase):
     def test_query_shopcart_item_list_by_amount(self):
         """ Query shopcart item list by amount """
         test_shopcart = ShopcartFactory()
-        resp = self.app.post("/shopcarts", json={"user_id": test_shopcart.user_id},
+        resp = self.app.post("/api/shopcarts", json={"user_id": test_shopcart.user_id},
                              content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         shopcart_id = resp.json["id"]
@@ -671,15 +670,15 @@ class TestShopcartServer(TestCase):
 
     def test_post_request_without_content_type(self):
         """POST Request Without content_type"""
-        resp = self.app.post("/shopcarts")
+        resp = self.app.post("/api/shopcarts")
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-        self.assertIn(b'Unsupported media type', resp.data)
+        self.assertIn(b'Content-Type must be application/json', resp.data)
 
     def test_post_request_with_wrong_content_type(self):
         """POST Request With Wrong content_type"""
-        resp = self.app.post("/shopcarts", content_type="text/plain")
+        resp = self.app.post("/api/shopcarts", content_type="text/plain")
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-        self.assertIn(b'Unsupported media type', resp.data)
+        self.assertIn(b'Content-Type must be application/json', resp.data)
 
 ######################################################################
 #  ERROR HANDLER TEST CASES
@@ -690,7 +689,7 @@ class TestShopcartServer(TestCase):
         bad_request_mock.side_effect = DataValidationError()
         test_shopcart = Shopcart()
         resp = self.app.post(
-            "/shopcarts", json=test_shopcart.serialize(), content_type="application/json"
+            "/api/shopcarts", json=test_shopcart.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 

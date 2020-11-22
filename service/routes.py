@@ -18,10 +18,16 @@ Shopcart Service with UI
 Paths:
 ------
 GET / - Displays a usage information for Selenium testing
-POST /shopcarts - creates a new shopcart record in the database
-POST /shopcartitems - creates a new shopcart item record in the database
-PUT /shopcartitems/{id} - updates a shopcart record in the database
-GET /shopcarts - Returns a list all of the Shopcarts
+GET /shopcarts - Returns a list of all the Shopcarts
+POST /shopcarts - Creates a new Shopcart record in the database
+GET /shopcarts/{id} - Returns the Shopcart with a given id number
+DELETE /shopcarts/{id} - Deletes a Shopcart record in the database
+PUT /shopcarts/{id}/place-order - Places an order
+GET /shopcarts/{id}/items - Gets Shopcart Item list from a Shopcart
+POST /shopcarts/{id}/items - Creates a new Shopcart Item record in the database
+GET /shopcarts/{id}/items/{item_id} - Returns the Shopcart Item with given id and item_id number
+PUT /shopcarts/{id}/items/{item_id} - Updates the Shopcart Item
+DELETE /shopcarts/{id}/items/{item_id} - Deletes the Shopcart Item
 """
 
 import sys
@@ -29,13 +35,96 @@ import logging
 from flask import jsonify, request, url_for, make_response, abort
 from flask.logging import create_logger
 from flask_api import status  # HTTP Status Codes
-
-from .models import Shopcart, ShopcartItem, DataValidationError
-
+from flask_restplus import Api, Resource, fields, reqparse, inputs
+from service.models import Shopcart, ShopcartItem, DataValidationError
 from . import app, constants
 
 # use create_logger function to avoid no-member errors for logger in pylint
 logger = create_logger(app)
+
+######################################################################
+# Configure Swagger before initializing it
+######################################################################
+
+api = Api(app,
+          version='1.0.0',
+          title='Shopcart REST API Service',
+          description='This is a Shopcart server.',
+          default='shopcarts',
+          default_label='Shopcart operations',
+          doc='/apidocs',
+          # authorizations=authorizations,
+          prefix='/api'
+          )
+
+# Define the model so that the docs reflect what can be sent
+shopcart_model = api.model('Shopcart', {
+    'id': fields.Integer(readOnly=True,
+                          description='The unique id assigned internally by service'),
+    'user_id': fields.Integer(required=True,
+                              description='The id of the User'),
+    'create_time': fields.DateTime(readOnly=True,
+                                   description='The time the record is created'),
+    'update_time': fields.DateTime(readOnly=True,
+                                   description='The time the record is updated')
+})
+
+create_shopcart_model = api.model('Shopcart', {
+    'user_id': fields.Integer(required=True,
+                              description='The id of the User')
+})
+
+shopcart_item_model = api.model('ShopcartItem', {
+    'id': fields.Integer(readOnly=True,
+                          description='The unique id assigned internally by service'),
+    'sid': fields.Integer(readOnly=True,
+                          description='The id of the Shopcart this item belongs to'),
+    'sku': fields.Integer(required=True,
+                          description='The product id'),
+    'name': fields.String(required=True,
+                          description='The product name'),
+    'price': fields.Float(required=True,
+                          description='The price for one item'),
+    'amount': fields.Float(required=True,
+                           description='The number of product'),
+    'create_time': fields.DateTime(readOnly=True,
+                                   description='The time the record is created'),
+    'update_time': fields.DateTime(readOnly=True,
+                                   description='The time the record is updated')
+})
+
+create_shopcart_item_model = api.model('ShopcartItem', {
+    'sku': fields.Integer(required=True,
+                          description='The product id'),
+    'name': fields.String(required=True,
+                          description='The product name'),
+    'price': fields.Float(required=True,
+                          description='The price for one item'),
+    'amount': fields.Float(required=True,
+                           description='The number of product')
+})
+
+# query string arguments
+shopcart_args = reqparse.RequestParser()
+shopcart_args.add_argument('user_id', type=int, required=False, help='Find Shopcart by User Id')
+
+shopcart_item_args = reqparse.RequestParser()
+shopcart_item_args.add_argument('sku',
+                                type=int,
+                                required=False,
+                                help='Find Shopcart Item by Product Id')
+shopcart_item_args.add_argument('name',
+                                type=str,
+                                required=False,
+                                help='Find Shopcart Item by Product Name')
+shopcart_item_args.add_argument('price',
+                                type=float,
+                                required=False,
+                                help='Find Shopcart Item by Product Price')
+shopcart_item_args.add_argument('amount',
+                                type=float,
+                                required=False,
+                                help='Find Shopcart Item by Product Amount')
 
 
 ######################################################################
@@ -99,20 +188,6 @@ def mediatype_not_supported(error):
     )
 
 
-# @app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
-# def internal_server_error(error):
-#     """ Handles unexpected server error with 500_SERVER_ERROR """
-#     logger.error(str(error))
-#     return (
-#         jsonify(
-#             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             error="Internal Server Error",
-#             message=str(error),
-#         ),
-#         status.HTTP_500_INTERNAL_SERVER_ERROR,
-#     )
-
-
 ######################################################################
 # GET HEALTH CHECK
 ######################################################################
@@ -132,37 +207,62 @@ def index():
 
 
 ######################################################################
-# ADD A NEW SHOPCART
+#  PATH: /shopcarts
 ######################################################################
-@app.route("/shopcarts", methods=["POST"])
-def create_shopcarts():
-    """
-    Creates a Shopcart
-    This endpoint will create a Shopcart based the data in the body that is posted
-    """
-    logger.info("Request to create a shopcart")
-    check_content_type("application/json")
+@api.route('/shopcarts', strict_slashes=False)
+class ShopcartCollection(Resource):
+    # ------------------------------------------------------------------
+    # LIST ALL Shopcarts
+    # ------------------------------------------------------------------
+    @api.doc('list_shopcarts')
+    @api.expect(shopcart_args, validate=True)
+    @api.marshal_list_with(shopcart_model)
+    def get(self):
+        """ Returns all of the Shopcarts """
+        logger.info('Request to list Shopcarts...')
 
-    shopcart = None
+        args = shopcart_args.parse_args()
 
-    data = request.get_json()
-    if 'user_id' in data:
-        shopcart = Shopcart.find_by_user(data['user_id']).first()
+        if args['user_id']:
+            logger.info('Find by user')
+            shopcarts = Shopcart.find_by_user(args['user_id'])
+        else:
+            logger.info('Find all')
+            shopcarts = Shopcart.all()
 
-    if shopcart is None:
-        shopcart = Shopcart()
-        if "id" in data:
-            data.pop("id")
-        shopcart.deserialize(data)
-        shopcart.create()
+        results = [shopcart.serialize() for shopcart in shopcarts]
+        logger.info('[%s] Shopcarts returned', len(results))
+        return results, status.HTTP_200_OK
 
-    message = shopcart.serialize()
-    location_url = url_for("get_shopcart", shopcart_id=shopcart.id, _external=True)
+    # ------------------------------------------------------------------
+    # ADD A NEW Shopcart
+    # ------------------------------------------------------------------
+    @api.doc('create_shopcarts')
+    @api.expect(create_shopcart_model)
+    @api.response(400, 'The posted data was not valid')
+    @api.response(201, 'Shopcart created successfully')
+    @api.marshal_with(shopcart_model, code=201)
+    def post(self):
+        logger.info("Request to create a shopcart")
+        check_content_type("application/json")
 
-    logger.info("Shopcart with ID [%s] created.", shopcart.id)
-    return make_response(
-        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
-    )
+        logger.debug('Payload = %s', api.payload)
+
+        shopcart = None
+
+        if 'user_id' in api.payload:
+            shopcart = Shopcart.find_by_user(api.payload['user_id']).first()
+
+        if shopcart is None:
+            shopcart = Shopcart()
+            shopcart.deserialize(api.payload)
+            shopcart.create()
+
+        logger.info("Shopcart with ID [%s] created.", shopcart.id)
+
+        location_url = url_for("get_shopcart", shopcart_id=shopcart.id, _external=True)
+
+        return shopcart.serialize(), status.HTTP_201_CREATED, {"Location": location_url}
 
 
 ######################################################################
@@ -293,36 +393,6 @@ def update(shopcart_id, item_id):
 
     logger.info("Shopcart item with ID [%s] updated.", shopcart_item.id)
     return make_response(jsonify(shopcart_item.serialize()), status.HTTP_200_OK)
-
-
-######################################################################
-# LIST ALL Shopcarts
-######################################################################
-@app.route('/shopcarts', methods=['GET'])
-def list_shopcarts():
-    """ Returns all of the Shopcarts """
-    logger.info('Request to list Shopcarts...')
-    check_content_type("application/json")
-
-    user_id = request.args.get("user_id")
-    if user_id:
-        logger.info('Find by user')
-        shopcart = Shopcart.find_by_user(user_id).first()
-
-        if shopcart:
-            logger.info('1 Shopcart returned')
-            return make_response(jsonify(shopcart.serialize()), status.HTTP_200_OK)
-
-        else:
-            return not_found("Shopcart with User ID [%s] not found." % user_id)
-
-    else:
-        logger.info('Find all')
-        shopcarts = Shopcart.all()
-
-        results = [shopcart.serialize() for shopcart in shopcarts]
-        logger.info('[%s] Shopcarts returned', len(results))
-        return make_response(jsonify(results), status.HTTP_200_OK)
 
 
 ######################################################################

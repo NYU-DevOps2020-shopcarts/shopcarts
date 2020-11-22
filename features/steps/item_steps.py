@@ -34,10 +34,10 @@ def step_impl(context):
     create_url = context.base_url + '/shopcarts'
     for row in context.table:
         # Get the shopcart ID by querying the user ID
-        get_url = create_url + '?user_id=' + str(row['user'])
-        context.resp = requests.get(get_url, headers=headers)
+        get_url = context.base_url + '/api/shopcarts' + '?user_id=' + str(row['user'])
+        context.resp = requests.get(get_url)
         expect(context.resp.status_code).to_equal(200)
-        shopcart = context.resp.json()
+        shopcart = context.resp.json()[0]
         shopcart_id = shopcart["id"]
 
         # Add the shopcart item data to the appropriate shopcart

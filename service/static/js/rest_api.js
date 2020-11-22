@@ -47,7 +47,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "POST",
-            url: "/shopcarts",
+            url: "/api/shopcarts",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -140,12 +140,11 @@ $(function () {
 
         var ajax = $.ajax({
             type: "GET",
-            url: "/shopcarts?" + queryString,
-            contentType: "application/json"
+            url: "/api/shopcarts?" + queryString
         })
 
         ajax.done(function(res){
-            firstShopcart = shopcart_add_results_in_table([res])
+            firstShopcart = shopcart_add_results_in_table(res)
 
             // copy the first result to the form
             if (firstShopcart !== "") {
@@ -164,8 +163,7 @@ $(function () {
     $("#shopcart_list-btn").click(function () {
         var ajax = $.ajax({
             type: "GET",
-            url: "/shopcarts",
-            contentType: "application/json"
+            url: "/api/shopcarts"
         })
 
         ajax.done(function(res){

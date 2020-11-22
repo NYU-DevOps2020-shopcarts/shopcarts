@@ -31,7 +31,7 @@ sid (int) - shop cart id
 sku (int) - product id
 name (string) - product name
 price (float) - price for one
-amount (int) - number of product
+amount (float) - number of product
 create_time (DateTime) - the time this product was created
 update_time (DateTime) - the time this product was updated
 """
@@ -104,8 +104,8 @@ class Shopcart(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "create_time": str(self.create_time),
-            "update_time": str(self.update_time),
+            "create_time": self.create_time,
+            "update_time": self.update_time
         }
 
     def deserialize(self, data: dict):
