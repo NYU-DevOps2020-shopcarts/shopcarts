@@ -199,9 +199,7 @@ $(function () {
                 // Place order
                 $.ajax({
                     type: "PUT",
-                    url: "/shopcarts/"+shopcart_id+"/place-order",
-                    contentType: "application/json",
-                    data: shopcart_data,
+                    url: "/api/shopcarts/"+shopcart_id+"/place-order",
                     success: function(res)
                     {
                         $("#shopcart_search_results").empty()

@@ -307,7 +307,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(len(data), len(sku_shopcart_items))
 
         resp = self.app.put(
-            "/shopcarts/{}/place-order".format(shopcart_id),
+            "/api/shopcarts/{}/place-order".format(shopcart_id),
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
@@ -319,7 +319,7 @@ class TestShopcartServer(TestCase):
         test_shopcart = Shopcart()
         test_shopcart.id = 1
         resp = self.app.put(
-            "/shopcarts/{}/place-order".format(test_shopcart.id),
+            "/api/shopcarts/{}/place-order".format(test_shopcart.id),
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
@@ -332,7 +332,7 @@ class TestShopcartServer(TestCase):
         shopcart_id = resp.json["id"]
 
         resp = self.app.put(
-            "/shopcarts/{}/place-order".format(shopcart_id),
+            "/api/shopcarts/{}/place-order".format(shopcart_id),
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
