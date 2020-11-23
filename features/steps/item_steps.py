@@ -24,7 +24,7 @@ def step_impl(context):
     """ Delete all shopcart items and load new ones """
     headers = {'Content-Type': 'application/json'}
     # list all of the shopcarts and delete their items one by one
-    context.resp = requests.get(context.base_url + '/shopcarts/items', headers=headers)
+    context.resp = requests.get(context.base_url + '/api/shopcarts/items')
     expect(context.resp.status_code).to_equal(200)
     for item in context.resp.json():
         context.resp = requests.delete(context.base_url + '/shopcarts/' + str(item["sid"]) +

@@ -257,8 +257,8 @@ class ShopcartItem(db.Model):
             "name": self.name,
             "price": self.price,
             "amount": self.amount,
-            "create_time": str(self.create_time),
-            "update_time": str(self.update_time),
+            "create_time": self.create_time,
+            "update_time": self.update_time
         }
 
     def deserialize(self, data: dict):

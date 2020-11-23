@@ -396,37 +396,41 @@ def update(shopcart_id, item_id):
 
 
 ######################################################################
-# LIST ALL SHOPCARTITEMS
+#  PATH: /shopcarts/items
 ######################################################################
-@app.route('/shopcarts/items', methods=['GET'])
-def list_shopcart_items():
-    """ Returns all of the ShopcartItems """
-    logger.info('Request to list ShopcartItems...')
-    check_content_type("application/json")
+@api.route('/shopcarts/items', strict_slashes=False)
+class ShopcartItemQueryCollection(Resource):
+    # ------------------------------------------------------------------
+    # LIST ALL Shopcart Items or Query by sku, name, price, or amount
+    # ------------------------------------------------------------------
+    @api.doc('list_shopcart_items')
+    @api.expect(shopcart_item_args, validate=True)
+    @api.marshal_list_with(shopcart_item_model)
+    def get(self):
+        """ Returns all of the ShopcartItems """
+        logger.info('Request to list ShopcartItems...')
 
-    sku = request.args.get("sku")
-    name = request.args.get("name")
-    price = request.args.get("price")
-    amount = request.args.get("amount")
-    if sku:
-        logger.info('Find by sku')
-        shopcart_items = ShopcartItem.find_by_sku(sku)
-    elif name:
-        logger.info('Find by name')
-        shopcart_items = ShopcartItem.find_by_name(name)
-    elif price:
-        logger.info('Find by price')
-        shopcart_items = ShopcartItem.find_by_price(price)
-    elif amount:
-        logger.info('Find by amount')
-        shopcart_items = ShopcartItem.find_by_amount(amount)
-    else:
-        logger.info('Find all')
-        shopcart_items = ShopcartItem.all()
+        args = shopcart_item_args.parse_args()
 
-    results = [shopcart_item.serialize() for shopcart_item in shopcart_items]
-    logger.info('[%s] Shopcart Items returned', len(results))
-    return make_response(jsonify(results), status.HTTP_200_OK)
+        if args['sku']:
+            logger.info('Find by sku')
+            shopcart_items = ShopcartItem.find_by_sku(args['sku'])
+        elif args['name']:
+            logger.info('Find by name')
+            shopcart_items = ShopcartItem.find_by_name(args['name'])
+        elif args['price']:
+            logger.info('Find by price')
+            shopcart_items = ShopcartItem.find_by_price(args['price'])
+        elif args['amount']:
+            logger.info('Find by amount')
+            shopcart_items = ShopcartItem.find_by_amount(args['amount'])
+        else:
+            logger.info('Find all')
+            shopcart_items = ShopcartItem.all()
+
+        results = [shopcart_item.serialize() for shopcart_item in shopcart_items]
+        logger.info('[%s] Shopcart Items returned', len(results))
+        return results, status.HTTP_200_OK
 
 
 ######################################################################

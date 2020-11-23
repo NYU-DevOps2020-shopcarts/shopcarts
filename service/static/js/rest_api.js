@@ -390,9 +390,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "GET",
-            url: "/shopcarts/items?" + queryString,
-            contentType: "application/json",
-            data: ''
+            url: "/api/shopcarts/items?" + queryString
         })
 
         ajax.done(function(res){

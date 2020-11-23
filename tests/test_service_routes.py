@@ -301,7 +301,7 @@ class TestShopcartServer(TestCase):
         test_sku = shopcart_items[0].sku
         sku_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.sku == test_sku]
-        resp = self.app.get("/shopcarts/items", query_string="sku={}".format(test_sku), content_type="application/json")
+        resp = self.app.get("/api/shopcarts/items", query_string="sku={}".format(test_sku))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), len(sku_shopcart_items))
@@ -547,7 +547,7 @@ class TestShopcartServer(TestCase):
         shopcart_id = resp.json["id"]
         count = 10
         shopcart_items = self._create_shopcart_items(count, shopcart_id)
-        resp = self.app.get("/shopcarts/items", content_type="application/json")
+        resp = self.app.get("/api/shopcarts/items")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), count)
@@ -563,8 +563,7 @@ class TestShopcartServer(TestCase):
         test_sku = shopcart_items[0].sku
         sku_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                               if shopcart_item.sku == test_sku]
-        resp = self.app.get("/shopcarts/items",
-                            query_string="sku={}".format(test_sku), content_type="application/json")
+        resp = self.app.get("/api/shopcarts/items", query_string="sku={}".format(test_sku))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), len(sku_shopcart_items))
@@ -583,8 +582,7 @@ class TestShopcartServer(TestCase):
         test_name = shopcart_items[0].name
         name_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                                if shopcart_item.name == test_name]
-        resp = self.app.get("/shopcarts/items",
-                            query_string="name={}".format(test_name), content_type="application/json")
+        resp = self.app.get("/api/shopcarts/items", query_string="name={}".format(test_name))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), len(name_shopcart_items))
@@ -603,8 +601,7 @@ class TestShopcartServer(TestCase):
         test_price = shopcart_items[0].price
         price_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                                 if shopcart_item.price == test_price]
-        resp = self.app.get("/shopcarts/items",
-                            query_string="price={}".format(test_price), content_type="application/json")
+        resp = self.app.get("/api/shopcarts/items", query_string="price={}".format(test_price))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), len(price_shopcart_items))
@@ -623,8 +620,7 @@ class TestShopcartServer(TestCase):
         test_amount = shopcart_items[0].amount
         amount_shopcart_items = [shopcart_item for shopcart_item in shopcart_items
                                  if shopcart_item.amount == test_amount]
-        resp = self.app.get("/shopcarts/items",
-                            query_string="amount={}".format(test_amount), content_type="application/json")
+        resp = self.app.get("/api/shopcarts/items", query_string="amount={}".format(test_amount))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), len(amount_shopcart_items))
