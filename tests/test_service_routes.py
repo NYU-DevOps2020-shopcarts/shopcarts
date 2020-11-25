@@ -354,7 +354,7 @@ class TestShopcartServer(TestCase):
                     test_shopcart_item.sid = sid
 
                 resp = self.app.post(
-                    "/api/shopcarts/{}/items".format(sid), json=test_shopcart_item.serialize(),
+                    "/shopcarts/{}/items".format(sid), json=test_shopcart_item.serialize(),
                     content_type="application/json"
                 )
                 self.assertEqual(
@@ -442,7 +442,7 @@ class TestShopcartServer(TestCase):
         test_shopcart_item.sid = resp.json["id"]
         original_amount = test_shopcart_item.amount
         resp = self.app.post(
-            "/api/shopcarts/{}/items".format(test_shopcart_item.sid),
+            "/shopcarts/{}/items".format(test_shopcart_item.sid),
             json=test_shopcart_item.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -452,7 +452,7 @@ class TestShopcartServer(TestCase):
         updated_shopcart_item.sid = resp.json["id"]
         updated_amount = original_amount + updated_shopcart_item.amount
         resp = self.app.post(
-            "/api/shopcarts/{}/items".format(updated_shopcart_item.sid),
+            "/shopcarts/{}/items".format(updated_shopcart_item.sid),
             json=updated_shopcart_item.serialize(), content_type="application/json"
         )
         # check for status code
@@ -474,7 +474,7 @@ class TestShopcartServer(TestCase):
         test_shopcart_item = ShopcartItemFactory()
         test_shopcart_item.sid = resp.json["id"]
         resp = self.app.post(
-            "/api/shopcarts/{}/items".format(test_shopcart_item.sid),
+            "/shopcarts/{}/items".format(test_shopcart_item.sid),
             json=test_shopcart_item.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -486,7 +486,7 @@ class TestShopcartServer(TestCase):
         new_shopcart_item["name"] = "item_1"
         new_shopcart_item["amount"] = 4
         resp = self.app.put(
-            "/api/shopcarts/{}/items/{}".format(new_shopcart_item["sid"], new_shopcart_item["id"]),
+            "/shopcarts/{}/items/{}".format(new_shopcart_item["sid"], new_shopcart_item["id"]),
             json=new_shopcart_item,
             content_type="application/json",
         )
@@ -508,7 +508,7 @@ class TestShopcartServer(TestCase):
         test_shopcart_item = ShopcartItemFactory()
         test_shopcart_item.sid = resp.json["id"]
         resp = self.app.post(
-            "/api/shopcarts/{}/items".format(test_shopcart_item.sid),
+            "/shopcarts/{}/items".format(test_shopcart_item.sid),
             json=test_shopcart_item.serialize(), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -520,7 +520,7 @@ class TestShopcartServer(TestCase):
         new_shopcart_item["name"] = "item_1"
         new_shopcart_item["amount"] = 4
         resp = self.app.put(
-            "/api/shopcarts/{}/items/{}".format(new_shopcart_item["sid"] + 1, new_shopcart_item["id"]),
+            "/shopcarts/{}/items/{}".format(new_shopcart_item["sid"] + 1, new_shopcart_item["id"]),
             json=new_shopcart_item,
             content_type="application/json",
         )
@@ -532,7 +532,7 @@ class TestShopcartServer(TestCase):
         # create a shopcart item to update
         new_shopcart_item = {"price": 50.00}
         resp = self.app.put(
-            "/api/shopcarts/{}/items/{}".format(1, 1),
+            "/shopcarts/{}/items/{}".format(1, 1),
             json=new_shopcart_item,
             content_type="application/json",
         )
@@ -634,7 +634,7 @@ class TestShopcartServer(TestCase):
         shopcart_id = shopcart[0].id
         count = 5
         shopcart_items = self._create_shopcart_items(count, shopcart_id)
-        response = self.app.get("/api/shopcarts/{}/items/".format(shopcart_id), content_type="application/json")
+        response = self.app.get("/shopcarts/{}/items/".format(shopcart_id), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         shopcart_items_resp = response.get_json()
         self.assertTrue(len(shopcart_items) != 0)
@@ -643,7 +643,7 @@ class TestShopcartServer(TestCase):
 
     def test_get_shopcart_item_not_found(self):
         """ Get a Shopcart Item thats not found """
-        resp = self.app.get("/api/shopcarts/0/items/0", content_type="application/json")
+        resp = self.app.get("/shopcarts/0/items/0", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_shopcart_items(self):

@@ -291,6 +291,28 @@ def get_shopcart(shopcart_id):
         jsonify(response), status.HTTP_200_OK
     )
 
+
+######################################################################
+# G E T  S H O P C A R T  D E T A I L S
+######################################################################
+@app.route("/shopcarts/<int:shopcart_id>/items/", methods=["GET"])
+def get_shopcart_items(shopcart_id):
+    """
+    Get information of a shopcart
+    This endpoint will return items in the shop cart
+    """
+    logger.info("Request to get items in a shopcart")
+    check_content_type("application/json")
+
+    shopcart_items = ShopcartItem.find_by_shopcartid(shopcart_id)
+
+    result = [item.serialize() for item in shopcart_items]
+    logger.info("Fetched items for Shopcart with ID [%s].", shopcart_id)
+    return make_response(
+        jsonify(result), status.HTTP_200_OK
+    )
+
+
 ######################################################################
 # G E T  S H O P C A R T  I T E M
 ######################################################################
@@ -317,37 +339,33 @@ def get_shopcart_item(shopcart_id, item_id):
 
 
 ######################################################################
-#  PATH: /shopcarts/items
+# ADD A NEW SHOPCARTITEM
 ######################################################################
-@api.route('/shopcarts/items', strict_slashes=False)
-class ShopcartItemCollection(Resource):
-    """ Handles all interactions with collections of Shopcart Items """
-    #------------------------------------------------------------------
-    # LIST ALL Shopcart Items
-    #------------------------------------------------------------------
-    @api.doc('list_shopcart_items')
-    @api.expect(shopcart_item_args, validate=True)
-    @api.marshal_list_with(shopcart_item_model)
-    def get(self):
-        """ Returns all of the Shopcart Items """
-        app.logger.info('Request to list Shopcart Items...')
-        shopcart_item_args = []
-        args = shopcart_item_args.parse_args()
-        if args['sku']:
-            app.logger.info('Filtering by sku: %s', args['sku'])
-            shopcart_items = ShopcartItem.find_by_sku(args['sku'])
-        elif args['name']:
-            app.logger.info('Filtering by name: %s', args['name'])
-            shopcart_items = ShopcartItem.find_by_sku(args['name'])
-        elif args['available'] is not None:
-            app.logger.info('Filtering by availability: %s', args['available'])
-            shopcart_items = ShopcartItem.find_by_sku(args['available'])
-        else:
-            shopcart_items = ShopcartItem.all()
+@app.route("/shopcarts/<int:shopcart_id>/items", methods=["POST"])
+def create_shopcart_items(shopcart_id):
+    """
+    Creates a ShopcartItem
+    This endpoint will create a ShopcartItem based the data in the body that is posted
+    """
+    logger.info("Request to create a shopcart item")
+    check_content_type("application/json")
 
-        results = [shopcart_item.serialize() for shopcart_item in shopcart_items]
-        logger.info('[%s] Shopcart Items returned', len(results))
-        return results, status.HTTP_200_OK
+    shopcart_item = ShopcartItem()
+    data = request.get_json()
+    if "id" in data:
+        data.pop("id")
+    data["sid"] = shopcart_id
+    shopcart_item.deserialize(data)
+    shopcart_item.add()
+
+    message = shopcart_item.serialize()
+    location_url = url_for("get_shopcart_item",
+                           shopcart_id=shopcart_item.sid, item_id=shopcart_item.id, _external=True)
+    logger.info("ShopcartItem with ID [%s] created.", shopcart_item.id)
+    return make_response(
+        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+    )
+
 
 ######################################################################
 # UPDATE AN EXISTING SHOPCARTITEM
