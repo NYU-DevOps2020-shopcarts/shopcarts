@@ -47,4 +47,4 @@ app.logger.info(70 * '*')
 
 routes.init_db()
 
-app.logger.info('Service initialized!')
+app.logger.info('Service inititalized!')

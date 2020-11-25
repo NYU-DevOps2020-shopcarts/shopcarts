@@ -538,4 +538,3 @@ def init_db():
     """ Initialies the SQLAlchemy app """
     Shopcart.init_db(app)
     ShopcartItem.init_db(app)
-    logger.info("Database has been initialized!")
