@@ -181,13 +181,13 @@ class TestShopcartServer(TestCase):
     def test_non_existing_shopcart(self):
         """ Find a Shopcart by id that doesn't exist """
         shopcart_id = 1
-        response = self.app.get("/shopcarts/" + str(shopcart_id), content_type="application/json")
+        response = self.app.get("/api/shopcarts/" + str(shopcart_id), content_type="application/json")
         resp = response.get_json()
-        self.assertEqual(resp["status"], status.HTTP_404_NOT_FOUND)
-        self.assertEqual(resp["error"], constants.NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_shopcart_with_zero_items(self):
         """ Find a Shopcart by id that has no items """
+
         shopcart_id = 1
         test_shopcart = ShopcartFactory()
         create_resp = self.app.post(
@@ -195,7 +195,7 @@ class TestShopcartServer(TestCase):
             content_type="application/json"
         )
         self.assertEqual(create_resp.status_code, status.HTTP_201_CREATED)
-        shopcart_resp = self.app.get("/shopcarts/" + str(shopcart_id), content_type="application/json")
+        shopcart_resp = self.app.get("/api/shopcarts/" + str(shopcart_id), content_type="application/json")
         resp = shopcart_resp.get_json()
         self.assertEqual(shopcart_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp["id"], shopcart_id)
@@ -227,7 +227,7 @@ class TestShopcartServer(TestCase):
         count = 5
         shopcart_id = resp.json["id"]
         shopcart_items = self._create_shopcart_items(count, shopcart_id)
-        get_items_response = self.app.get("/shopcarts/" + str(shopcart_id), content_type="application/json")
+        get_items_response = self.app.get("/api/shopcarts/" + str(shopcart_id), content_type="application/json")
         self.assertEqual(get_items_response.status_code, status.HTTP_200_OK)
         response = get_items_response.get_json()
         self.assertEqual(response["id"], shopcart_id)
@@ -282,7 +282,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(len(ShopcartItem.all()), 5)
 
         resp = self.app.delete(
-            "/shopcarts/{}".format(shopcart.id), content_type="application/json"
+            "/api/shopcarts/{}".format(shopcart.id), content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(resp.data), 0)

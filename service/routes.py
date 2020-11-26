@@ -58,21 +58,6 @@ api = Api(app,
           )
 
 # Define the model so that the docs reflect what can be sent
-shopcart_model = api.model('Shopcart', {
-    'id': fields.Integer(readOnly=True,
-                          description='The unique id assigned internally by service'),
-    'user_id': fields.Integer(required=True,
-                              description='The id of the User'),
-    'create_time': fields.DateTime(readOnly=True,
-                                   description='The time the record is created'),
-    'update_time': fields.DateTime(readOnly=True,
-                                   description='The time the record is updated')
-})
-
-create_shopcart_model = api.model('Shopcart', {
-    'user_id': fields.Integer(required=True,
-                              description='The id of the User')
-})
 
 shopcart_item_model = api.model('ShopcartItem', {
     'id': fields.Integer(readOnly=True,
@@ -92,6 +77,25 @@ shopcart_item_model = api.model('ShopcartItem', {
     'update_time': fields.DateTime(readOnly=True,
                                    description='The time the record is updated')
 })
+
+shopcart_model = api.model('Shopcart', {
+    'id': fields.Integer(readOnly=True,
+                          description='The unique id assigned internally by service'),
+    'user_id': fields.Integer(required=True,
+                              description='The id of the User'),
+    'create_time': fields.DateTime(readOnly=True,
+                                   description='The time the record is created'),
+    'update_time': fields.DateTime(readOnly=True,
+                                   description='The time the record is updated'),
+    'items': fields.List(fields.Nested(shopcart_item_model))                                  
+})
+
+create_shopcart_model = api.model('Shopcart', {
+    'user_id': fields.Integer(required=True,
+                              description='The id of the User')
+})
+
+
 
 create_shopcart_item_model = api.model('ShopcartItem', {
     'sku': fields.Integer(required=True,
@@ -260,36 +264,60 @@ class ShopcartCollection(Resource):
 
         logger.info("Shopcart with ID [%s] created.", shopcart.id)
 
-        location_url = url_for("get_shopcart", shopcart_id=shopcart.id, _external=True)
+        location_url = api.url_for(ShopcartResource, shopcart_id=shopcart.id, _external=True)
 
         return shopcart.serialize(), status.HTTP_201_CREATED, {"Location": location_url}
 
 
 ######################################################################
-# G E T  S H O P C A R T
+# G E T  A N D  D E L E T E  S H O P C A R T
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>", methods=["GET"])
-def get_shopcart(shopcart_id):
+@api.route('/shopcarts/<int:shopcart_id>')
+@api.param('shopcart_id', 'The Shopcart identifier')
+class ShopcartResource(Resource):
     """
-    Gets information about a Shopcart
-    This endpoint will get information about a shopcart
+    ShopcartResource class
+    Allows the manipulation of a single shopcart
+    GET /shopcart/{id} - Returns a shopcart with the id
+    DELETE /shopcart/{id} -  Deletes a shopcart with the id
     """
-    logger.info("Request to get information of a shopcart")
-    check_content_type("application/json")
 
-    shopcart = Shopcart.find(shopcart_id)
-    if shopcart is None:
-        logger.info("Shopcart with ID [%s] not found.", shopcart_id)
-        return not_found("Shopcart with ID [%s] not found." % shopcart_id)
+    @api.doc('get_shopcart')
+    @api.response(404, 'Shopcart not found')
+    @api.response(200, 'Shopcart returned successfully')
+    @api.marshal_with(shopcart_model)
+    def get(self, shopcart_id):
+        """
+            Gets information about a Shopcart
+            This endpoint will get information about a shopcart 
+        """    
+        logger.info("Request to get information of a shopcart")
+        shopcart = Shopcart.find(shopcart_id)
+        if shopcart is None:
+            logger.info("Shopcart with ID [%s] not found.", shopcart_id)
+            api.abort(status.HTTP_404_NOT_FOUND, "Shopcart with id '{}' was not found.".format(shopcart_id))
 
-    shopcart_items = ShopcartItem.find_by_shopcartid(shopcart_id)
-    response = shopcart.serialize()
-    response["items"] = [item.serialize() for item in shopcart_items]
+        shopcart_items = ShopcartItem.find_by_shopcartid(shopcart_id)
+        response = shopcart.serialize()
+        response["items"] = [item.serialize() for item in shopcart_items]
+        logger.info("Shopcart with ID [%s] fetched.", shopcart.id)
+        return response, status.HTTP_200_OK
+    
+    @api.doc('delete_shopcart')
+    @api.response(204, 'Shopcart has been deleted')
+    def delete(self, shopcart_id):
+        """
+        Delete a Shopcart
+        This endpoint will delete a Shopcart based the id specified in the path
+        """
+        logger.info('Request to delete Shopcart with id: %s', shopcart_id)
 
-    logger.info("Shopcart with ID [%s] fetched.", shopcart.id)
-    return make_response(
-        jsonify(response), status.HTTP_200_OK
-    )
+        item = Shopcart.find(shopcart_id)
+        if item:
+            item.delete()
+
+        logger.info('Shopcart with id: %s has been deleted', shopcart_id)
+        return make_response("", status.HTTP_204_NO_CONTENT)
 
 
 ######################################################################
@@ -463,26 +491,6 @@ class ShopcartItemQueryCollection(Resource):
         results = [shopcart_item.serialize() for shopcart_item in shopcart_items]
         logger.info('[%s] Shopcart Items returned', len(results))
         return results, status.HTTP_200_OK
-
-
-######################################################################
-# DELETE A SHOPCART
-######################################################################
-@app.route('/shopcarts/<int:shopcart_id>', methods=['DELETE'])
-def delete_shopcarts(shopcart_id):
-    """
-    Delete a Shopcart
-    This endpoint will delete a Shopcart based the id specified in the path
-    """
-    logger.info('Request to delete Shopcart with id: %s', shopcart_id)
-    check_content_type("application/json")
-
-    item = Shopcart.find(shopcart_id)
-    if item:
-        item.delete()
-
-    logger.info('Shopcart with id: %s has been deleted', shopcart_id)
-    return make_response("", status.HTTP_204_NO_CONTENT)
 
 
 ######################################################################

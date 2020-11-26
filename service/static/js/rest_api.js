@@ -76,7 +76,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "GET",
-            url: "/shopcarts/" + shopcart_id,
+            url: "/api/shopcarts/" + shopcart_id,
             contentType: "application/json"
         })
 
@@ -107,7 +107,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "DELETE",
-            url: "/shopcarts/" + shopcart_id,
+            url: "/api/shopcarts/" + shopcart_id,
             contentType: "application/json"
         })
 
