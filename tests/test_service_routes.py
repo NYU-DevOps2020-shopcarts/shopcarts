@@ -486,9 +486,8 @@ class TestShopcartServer(TestCase):
         new_shopcart_item["name"] = "item_1"
         new_shopcart_item["amount"] = 4
         resp = self.app.put(
-            "/shopcarts/{}/items/{}".format(new_shopcart_item["sid"], new_shopcart_item["id"]),
-            json=new_shopcart_item,
-            content_type="application/json",
+            "/api/shopcarts/{}/items/{}".format(new_shopcart_item["sid"], new_shopcart_item["id"]),
+            json=new_shopcart_item, content_type="application/json",
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         updated_shopcart_item = resp.get_json()
@@ -520,7 +519,7 @@ class TestShopcartServer(TestCase):
         new_shopcart_item["name"] = "item_1"
         new_shopcart_item["amount"] = 4
         resp = self.app.put(
-            "/shopcarts/{}/items/{}".format(new_shopcart_item["sid"] + 1, new_shopcart_item["id"]),
+            "/api/shopcarts/{}/items/{}".format(new_shopcart_item["sid"] + 1, new_shopcart_item["id"]),
             json=new_shopcart_item,
             content_type="application/json",
         )
@@ -532,7 +531,7 @@ class TestShopcartServer(TestCase):
         # create a shopcart item to update
         new_shopcart_item = {"price": 50.00}
         resp = self.app.put(
-            "/shopcarts/{}/items/{}".format(1, 1),
+            "/api/shopcarts/{}/items/{}".format(1, 1),
             json=new_shopcart_item,
             content_type="application/json",
         )
@@ -643,7 +642,7 @@ class TestShopcartServer(TestCase):
 
     def test_get_shopcart_item_not_found(self):
         """ Get a Shopcart Item thats not found """
-        resp = self.app.get("/shopcarts/0/items/0", content_type="application/json")
+        resp = self.app.get("/api/shopcarts/0/items/0", content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_shopcart_items(self):
@@ -656,7 +655,7 @@ class TestShopcartServer(TestCase):
         self.assertEqual(len(ShopcartItem.all()), 1)
 
         resp = self.app.delete(
-            "/shopcarts/{}/items/{}".format(shopcart_id, shopcart_item.id),
+            "/api/shopcarts/{}/items/{}".format(shopcart_id, shopcart_item.id),
             content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)

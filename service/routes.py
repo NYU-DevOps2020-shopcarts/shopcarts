@@ -316,26 +316,86 @@ def get_shopcart_items(shopcart_id):
 ######################################################################
 # G E T  S H O P C A R T  I T E M
 ######################################################################
-@app.route('/shopcarts/<int:shopcart_id>/items/<int:item_id>', methods=["GET"])
-def get_shopcart_item(shopcart_id, item_id):
+@api.route('/shopcarts/<int:shopcart_id>/items/<int:item_id>')
+@api.param('shopcart_id', 'The Shopcart identifier')
+@api.param('item_id', 'The Shopcart Item identifier')
+class ShopcartItemResource(Resource):
     """
-    Get a shopcart item
-    This endpoint will return an item in the shop cart
+        ShopcartResource class
+        Allows the manipulation of a single shopcart
+        GET /shopcart/{id}/items/{id} - Returns a shopcart Item with the id
+        DELETE /shopcart/{id}/items/{id} -  Deletes a shopcart Item with the id
+        PUT /shopcart/{id}/items/{id} -  Updates a shopcart Item with the id
     """
-    logger.info("Request to get an item in a shopcart")
-    check_content_type("application/json")
 
-    shopcart_item = ShopcartItem.find(item_id)
+    @api.doc('get_shopcart_item')
+    @api.response(404, 'Shopcart Item not found')
+    @api.response(200, 'Shopcart Item found')
+    @api.marshal_with(shopcart_item_model, code=200)
+    def get(self, shopcart_id, item_id):
+        """
+        Get a shopcart item
+        This endpoint will return an item in the shop cart
+        """
+        logger.info("Request to get an item in a shopcart")
+        check_content_type("application/json")
 
-    if shopcart_item is None or shopcart_item.sid != shopcart_id:
-        logger.info("Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id)
-        return not_found("Shopcart item with ID [%s] not found in shopcart [%s]." % (item_id, shopcart_id))
+        shopcart_item = ShopcartItem.find(item_id)
 
-    result = shopcart_item.serialize()
-    logger.info("Fetched shopcart item with ID [%s].", item_id)
-    return make_response(
-        jsonify(result), status.HTTP_200_OK
-    )
+        if shopcart_item is None or shopcart_item.sid != shopcart_id:
+            logger.info("Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id)
+            api.abort(status.HTTP_404_NOT_FOUND,
+                      "Shopcart item with ID [%s] not found in shopcart [%s]." % (item_id, shopcart_id))
+
+        logger.info("Fetched shopcart item with ID [%s].", item_id)
+        return shopcart_item.serialize(), status.HTTP_200_OK
+
+    @api.doc('update_shopcart_item')
+    @api.response(404, 'Shopcart Item not found')
+    @api.response(400, 'The posted Item data was not valid')
+    @api.response(200, 'Shopcart Item updated')
+    @api.expect(shopcart_item_model)
+    @api.marshal_with(shopcart_item_model, code=200)
+    def put(self, shopcart_id, item_id):
+        """
+        Update a Shopcart item
+        This endpoint will update a Shopcart item based the body that is posted
+        """
+        logger.info("Request to update Shopcart item with id: %s", item_id)
+        check_content_type("application/json")
+
+        shopcart_item = ShopcartItem.find(item_id)
+
+        if shopcart_item is None or shopcart_item.sid != shopcart_id:
+            logger.info("Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id)
+            api.abort(status.HTTP_404_NOT_FOUND, "Shopcart item with id '{}' was not found.".format(item_id))
+
+        data = api.payload
+        data["sid"] = shopcart_id
+        data["id"] = item_id
+        shopcart_item.deserialize(data)
+        shopcart_item.update()
+
+        logger.info("Shopcart item with ID [%s] updated.", shopcart_item.id)
+        return shopcart_item.serialize(), status.HTTP_200_OK
+
+    @api.doc('delete_shopcart_item')
+    @api.response(204, 'Shopcart Item has been deleted')
+    def delete(self, shopcart_id, item_id):
+        """
+        Delete a ShopcartItem
+        This endpoint will delete a ShopcartItem based the id specified in the path
+        """
+        logger.info('Request to delete ShopcartItem with id: %s from Shopcart %s', item_id, shopcart_id)
+        check_content_type("application/json")
+
+        shopcart_item = ShopcartItem.find(item_id)
+
+        if shopcart_item is not None and shopcart_item.sid == shopcart_id:
+            shopcart_item.delete()
+
+        logger.info('ShopcartItem with id: %s has been deleted', item_id)
+        return "", status.HTTP_204_NO_CONTENT
 
 
 ######################################################################
@@ -359,40 +419,12 @@ def create_shopcart_items(shopcart_id):
     shopcart_item.add()
 
     message = shopcart_item.serialize()
-    location_url = url_for("get_shopcart_item",
-                           shopcart_id=shopcart_item.sid, item_id=shopcart_item.id, _external=True)
+    location_url = api.url_for(ShopcartItemResource,
+                               shopcart_id=shopcart_item.sid, item_id=shopcart_item.id, _external=True)
     logger.info("ShopcartItem with ID [%s] created.", shopcart_item.id)
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
-
-
-######################################################################
-# UPDATE AN EXISTING SHOPCARTITEM
-######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items/<int:item_id>", methods=["PUT"])
-def update(shopcart_id, item_id):
-    """
-    Update a Shopcart item
-    This endpoint will update a Shopcart item based the body that is posted
-    """
-    logger.info("Request to update Shopcart item with id: %s", item_id)
-    check_content_type("application/json")
-
-    shopcart_item = ShopcartItem.find(item_id)
-
-    if shopcart_item is None or shopcart_item.sid != shopcart_id:
-        logger.info("Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id)
-        return not_found("Shopcart item with id '{}' was not found.".format(item_id))
-
-    data = request.get_json()
-    data["sid"] = shopcart_id
-    data["id"] = item_id
-    shopcart_item.deserialize(data)
-    shopcart_item.update()
-
-    logger.info("Shopcart item with ID [%s] updated.", shopcart_item.id)
-    return make_response(jsonify(shopcart_item.serialize()), status.HTTP_200_OK)
 
 
 ######################################################################
@@ -431,27 +463,6 @@ class ShopcartItemQueryCollection(Resource):
         results = [shopcart_item.serialize() for shopcart_item in shopcart_items]
         logger.info('[%s] Shopcart Items returned', len(results))
         return results, status.HTTP_200_OK
-
-
-######################################################################
-# DELETE A SHOPCARTITEM
-######################################################################
-@app.route('/shopcarts/<int:shopcart_id>/items/<int:item_id>', methods=['DELETE'])
-def delete_shopcart_items(shopcart_id, item_id):
-    """
-    Delete a ShopcartItem
-    This endpoint will delete a ShopcartItem based the id specified in the path
-    """
-    logger.info('Request to delete ShopcartItem with id: %s from Shopcart %s', item_id, shopcart_id)
-    check_content_type("application/json")
-
-    shopcart_item = ShopcartItem.find(item_id)
-
-    if shopcart_item is not None and shopcart_item.sid == shopcart_id:
-        shopcart_item.delete()
-
-    logger.info('ShopcartItem with id: %s has been deleted', item_id)
-    return make_response("", status.HTTP_204_NO_CONTENT)
 
 
 ######################################################################

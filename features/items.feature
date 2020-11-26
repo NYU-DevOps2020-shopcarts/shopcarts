@@ -56,7 +56,7 @@ Scenario: Create an item
     And the item "Amount" field should be empty
     And the item "Price" field should be empty
     When I paste the item "Shopcart Id" field
-    And I press the item "Retrieve" button
+    And I press the item "List" button
     Then I should see "1000 item_1 5.75 1" in the item results
     When I paste the item "Shopcart Id" field
     And I set the item "Product Id" to "1000"
@@ -65,7 +65,7 @@ Scenario: Create an item
     And I set the item "Price" to "5.75"
     And I press the item "Create" button
     Then I should see the message "Success"
-    When I press the item "Retrieve" button
+    When I press the item "List" button
     Then I should see "1000 item_1 5.75 2" in the item results
     And I should not see "1000 item_1 5.75 1" in the item results
 
@@ -79,7 +79,7 @@ Scenario: List items in a shopcart
     Then the "Id" field should be empty
     And the "User" field should be empty
     When I paste the item "Shopcart Id" field
-    And I press the item "Retrieve" button
+    And I press the item "List" button
     Then I should see the message "Success"
     And I should see "1000 item_1 5.75 2" in the item results
     And I should see "3000 item_3 10.09 3" in the item results
@@ -132,7 +132,7 @@ Scenario: Delete an item
     And I set the "User" to "1"
     And I press the "Search" button
     Then the item "Shopcart Id" field should not be empty
-    When I press the item "Retrieve" button
+    When I press the item "List" button
     Then I should see the message "Success"
     When I copy the item "Shopcart Id" field
     When I press the item "Delete" button
@@ -145,15 +145,15 @@ Scenario: Delete an item
     And the item "Amount" field should be empty
     And the item "Price" field should be empty
     When I paste the item "Shopcart Id" field
-    And I press the item "Retrieve" button
+    And I press the item "List" button
     Then I should not see "1000 item_1 5.75 1" in the item results
-    And I should not see "1000 item_1 5.75 2" in the item results
+    And I should see "3000 item_3 10.09 3" in the item results
     When I press the item "Clear" button
     And I press the "Clear" button
     And I set the "User" to "2"
     And I press the "Search" button
     Then the item "Shopcart Id" field should not be empty
-    When I press the item "Retrieve" button
+    When I press the item "List" button
     Then I should see the message "Success"
     When I copy the item "Shopcart Id" field
     When I press the item "Delete" button
@@ -166,7 +166,7 @@ Scenario: Delete an item
     And the item "Amount" field should be empty
     And the item "Price" field should be empty
     When I paste the item "Shopcart Id" field
-    And I press the item "Retrieve" button
+    And I press the item "List" button
     Then I should see the message "is empty"
 
 Scenario: Update an item
@@ -186,6 +186,6 @@ Scenario: Update an item
     When I copy the item "Shopcart Id" field
     And I press the item "Clear" button
     And I paste the item "Shopcart Id" field
-    And I press the item "Retrieve" button
+    And I press the item "List" button
     Then I should see "item_4" in the item results
     Then I should not see "item_2" in the item results

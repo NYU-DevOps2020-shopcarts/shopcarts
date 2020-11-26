@@ -313,7 +313,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "PUT",
-            url: "/shopcarts/"+shopcart_id+"/items/"+shopcart_item_id,
+            url: "/api/shopcarts/" + shopcart_id + "/items/" + shopcart_item_id,
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -330,7 +330,7 @@ $(function () {
         });
     });
 
-    $("#item_retrieve-btn").click(function () {
+    $("#item_list-btn").click(function () {
         var shopcart_id = $("#item_shopcart_id").val();
 
         if (shopcart_id === "") {
@@ -362,6 +362,34 @@ $(function () {
             flash_message(res.responseJSON.message)
         });
 
+    });
+
+    $("#item_retrieve-btn").click(function () {
+        var shopcart_id = $("#item_shopcart_id").val();
+        var item_id = $("#item_id").val();
+
+        if (item_id === '' || shopcart_id === "") {
+            return
+        }
+
+        var ajax = $.ajax({
+            type: "GET",
+            url: "/api/shopcarts/" + shopcart_id + "/items/" + item_id,
+            contentType: "application/json"
+        })
+
+        ajax.done(function (res) {
+            shopcart_item_update_form_data(res);
+
+            add_results_in_table_for_items([res]);
+
+            flash_message("Success")
+        });
+
+        ajax.fail(function (res) {
+            $("#shopcart_search_results").empty()
+            flash_message(res.responseJSON.message)
+        });
     });
 
     $(".search-btn-items").click(function () {
@@ -417,7 +445,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "DELETE",
-            url: "/shopcarts/" + shopcart_id + "/items/" + shopcart_item_id,
+            url: "/api/shopcarts/" + shopcart_id + "/items/" + shopcart_item_id,
             contentType: "application/json"
         })
 

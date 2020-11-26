@@ -27,7 +27,7 @@ def step_impl(context):
     context.resp = requests.get(context.base_url + '/api/shopcarts/items')
     expect(context.resp.status_code).to_equal(200)
     for item in context.resp.json():
-        context.resp = requests.delete(context.base_url + '/shopcarts/' + str(item["sid"]) +
+        context.resp = requests.delete(context.base_url + '/api/shopcarts/' + str(item["sid"]) +
                        '/items/' + str(item["id"]), headers=headers)
         expect(context.resp.status_code).to_equal(204)
     
