@@ -228,6 +228,8 @@ class ShopcartItem(db.Model):
             self.amount = shopcart_item.amount + self.amount
             shopcart_item.amount = self.amount
             shopcart_item.update()
+            self.create_time = shopcart_item.create_time
+            self.update_time = shopcart_item.update_time
         else:
             self.id = None
             db.session.add(self)

@@ -193,8 +193,7 @@ $(function () {
         //Get the items for this shopcart
         $.ajax({
             type: "GET",
-            url: "/shopcarts/" + shopcart_id + "/items",
-            contentType: "application/json",
+            url: "/api/shopcarts/" + shopcart_id + "/items",
             success: function(shopcart_data){
                 // Place order
                 $.ajax({
@@ -275,7 +274,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "POST",
-            url: "/shopcarts/"+shopcart_id+"/items",
+            url: "/api/shopcarts/"+shopcart_id+"/items",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -339,8 +338,7 @@ $(function () {
 
         var ajax = $.ajax({
             type: "GET",
-            url: "/shopcarts/" + shopcart_id + "/items/",
-            contentType: "application/json"
+            url: "/api/shopcarts/" + shopcart_id + "/items/"
         })
 
         ajax.done(function(res){

@@ -31,7 +31,7 @@ def step_impl(context):
                        '/items/' + str(item["id"]), headers=headers)
         expect(context.resp.status_code).to_equal(204)
     
-    create_url = context.base_url + '/shopcarts'
+    create_url = context.base_url + '/api/shopcarts'
     for row in context.table:
         # Get the shopcart ID by querying the user ID
         get_url = context.base_url + '/api/shopcarts' + '?user_id=' + str(row['user'])

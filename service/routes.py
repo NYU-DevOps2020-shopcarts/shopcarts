@@ -87,15 +87,13 @@ shopcart_model = api.model('Shopcart', {
                                    description='The time the record is created'),
     'update_time': fields.DateTime(readOnly=True,
                                    description='The time the record is updated'),
-    'items': fields.List(fields.Nested(shopcart_item_model))                                  
+    'items': fields.List(fields.Nested(shopcart_item_model))
 })
 
 create_shopcart_model = api.model('Shopcart', {
     'user_id': fields.Integer(required=True,
                               description='The id of the User')
 })
-
-
 
 create_shopcart_item_model = api.model('ShopcartItem', {
     'sku': fields.Integer(required=True,
@@ -319,28 +317,6 @@ class ShopcartResource(Resource):
         logger.info('Shopcart with id: %s has been deleted', shopcart_id)
         return make_response("", status.HTTP_204_NO_CONTENT)
 
-
-######################################################################
-# G E T  S H O P C A R T  D E T A I L S
-######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items/", methods=["GET"])
-def get_shopcart_items(shopcart_id):
-    """
-    Get information of a shopcart
-    This endpoint will return items in the shop cart
-    """
-    logger.info("Request to get items in a shopcart")
-    check_content_type("application/json")
-
-    shopcart_items = ShopcartItem.find_by_shopcartid(shopcart_id)
-
-    result = [item.serialize() for item in shopcart_items]
-    logger.info("Fetched items for Shopcart with ID [%s].", shopcart_id)
-    return make_response(
-        jsonify(result), status.HTTP_200_OK
-    )
-
-
 ######################################################################
 # G E T  S H O P C A R T  I T E M
 ######################################################################
@@ -425,35 +401,55 @@ class ShopcartItemResource(Resource):
         logger.info('ShopcartItem with id: %s has been deleted', item_id)
         return "", status.HTTP_204_NO_CONTENT
 
-
 ######################################################################
-# ADD A NEW SHOPCARTITEM
+#  PATH: /shopcarts/:id/items
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items", methods=["POST"])
-def create_shopcart_items(shopcart_id):
-    """
-    Creates a ShopcartItem
-    This endpoint will create a ShopcartItem based the data in the body that is posted
-    """
-    logger.info("Request to create a shopcart item")
-    check_content_type("application/json")
+@api.route('/shopcarts/<int:shopcart_id>/items', strict_slashes=False)
+@api.param('shopcart_id', 'The Shopcart identifier')
+class ShopcartItemCollection(Resource):
+    """ Handles all interactions with collections of Shopcart Items """
 
-    shopcart_item = ShopcartItem()
-    data = request.get_json()
-    if "id" in data:
-        data.pop("id")
-    data["sid"] = shopcart_id
-    shopcart_item.deserialize(data)
-    shopcart_item.add()
+    @api.doc('list_shopcart_items')
+    @api.response(200, 'Shopcart Items returned successfully')
+    @api.marshal_list_with(shopcart_item_model)
+    def get(self, shopcart_id):
+        """
+        Get information of a shopcart
+        This endpoint will return items in the shop cart
+        """
+        logger.info("Request to get items in a shopcart")
+        shopcart_items = ShopcartItem.find_by_shopcartid(shopcart_id)
+        result = [item.serialize() for item in shopcart_items]
+        logger.info("Fetched items for Shopcart with ID [%s].", shopcart_id)
 
-    message = shopcart_item.serialize()
-    location_url = api.url_for(ShopcartItemResource,
-                               shopcart_id=shopcart_item.sid, item_id=shopcart_item.id, _external=True)
-    logger.info("ShopcartItem with ID [%s] created.", shopcart_item.id)
-    return make_response(
-        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
-    )
+        return result, status.HTTP_200_OK
 
+    @api.doc('create_shopcart_item')
+    @api.response(201, 'Shopcart Items has been created')
+    @api.response(400, 'The posted data was not valid')
+    @api.expect(shopcart_item_model)
+    @api.marshal_with(shopcart_item_model, code=201)
+    def post(self, shopcart_id):
+        logger.info("Request to create a shopcart item")
+        check_content_type("application/json")
+
+        shopcart_item = ShopcartItem()
+        data = request.get_json()
+        if "id" in data:
+            data.pop("id")
+
+        data["sid"] = shopcart_id
+
+        shopcart_item.deserialize(data)
+        shopcart_item.add()
+
+        location_url = api.url_for(ShopcartItemResource,
+                                   shopcart_id=shopcart_item.sid, item_id=shopcart_item.id,
+                                   _external=True)
+
+        logger.info("ShopcartItem with ID [%s] created.", shopcart_item.id)
+
+        return shopcart_item, status.HTTP_201_CREATED, {"Location": location_url}
 
 ######################################################################
 #  PATH: /shopcarts/items
@@ -494,7 +490,7 @@ class ShopcartItemQueryCollection(Resource):
 
 
 ######################################################################
-# PATH: /shopcarts/{id}}/place-order
+# PATH: /shopcarts/{id}/place-order
 ######################################################################
 @api.route('/shopcarts/<int:shopcart_id>/place-order')
 @api.param('shopcart_id', 'The Shopcart identifier')
@@ -547,28 +543,6 @@ def check_content_type(content_type):
 
     logger.error('Invalid Content-Type: %s', request.headers['Content-Type'])
     abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, 'Content-Type must be {}'.format(content_type))
-
-
-# # @app.before_first_request
-# def initialize_logging(log_level=app.config['LOGGING_LEVEL']):
-#     """ Initialized the default logging to STDOUT """
-#     if not app.debug:
-#         print('Setting up logging...')
-#         # Set up default logging for submodules to use STDOUT
-#         # datefmt='%m/%d/%Y %I:%M:%S %p'
-#         fmt = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
-#         logging.basicConfig(stream=sys.stdout, level=log_level, format=fmt)
-#         # Make a new log handler that uses STDOUT
-#         handler = logging.StreamHandler(sys.stdout)
-#         handler.setFormatter(logging.Formatter(fmt))
-#         handler.setLevel(log_level)
-#         # Remove the Flask default handlers and use our own
-#         handler_list = list(logger.handlers)
-#         for log_handler in handler_list:
-#             logger.removeHandler(log_handler)
-#         logger.addHandler(handler)
-#         logger.setLevel(log_level)
-#         logger.info('Logging handler established')
 
 
 def init_db():
