@@ -54,7 +54,7 @@ $(function () {
 
         ajax.done(function(res){
             shopcart_update_form_data(res)
-            flash_message("Success")
+            flash_message("Shopcart has been created!")
         });
 
         ajax.fail(function(res){
@@ -85,7 +85,7 @@ $(function () {
 
             shopcart_add_results_in_table([res])
 
-            flash_message("Success")
+            flash_message("Shopcart has been retrieved!")
         });
 
         ajax.fail(function(res){
@@ -112,7 +112,7 @@ $(function () {
         })
 
         ajax.done(function(res){
-            flash_message("Shopcart has been Deleted!")
+            flash_message("Shopcart has been deleted!")
         });
 
         ajax.fail(function(res){
@@ -151,7 +151,7 @@ $(function () {
                 shopcart_update_form_data(firstShopcart)
             }
 
-            flash_message("Success")
+            flash_message("Please see the search result below!")
         });
 
         ajax.fail(function(res){
@@ -175,7 +175,7 @@ $(function () {
                 shopcart_update_form_data(firstShopcart)
             }
 
-            flash_message("Success")
+            flash_message("Please see the list result below!")
         });
 
         ajax.fail(function(res){
@@ -203,7 +203,7 @@ $(function () {
                     {
                         $("#shopcart_search_results").empty()
                         $("#item_search_results").empty()
-                        flash_message("Order was successfully placed")
+                        flash_message("Order was successfully placed!")
                     },
                     fail: function(res){
                         flash_message(res.responseJSON.message)
@@ -218,6 +218,7 @@ $(function () {
 
     $("#shopcart_clear-btn").click(function () {
         $("#shopcart_search_results").empty()
+        flash_message("")
     })
 
     // Updates the form with data from the response
@@ -282,7 +283,7 @@ $(function () {
         ajax.done(function(res){
             shopcart_item_update_form_data(res)
 
-            flash_message("Success")
+            flash_message("Item has been created!")
         });
 
         ajax.fail(function(res){
@@ -320,7 +321,7 @@ $(function () {
         ajax.done(function(res){
             shopcart_item_update_form_data(res)
 
-            flash_message("Success")
+            flash_message("Item has been updated!")
         });
 
         ajax.fail(function(res){
@@ -351,7 +352,7 @@ $(function () {
 
                 shopcart_item_update_form_data(firstShopcart)
 
-                flash_message("Success")
+                flash_message("Please see the item list results below!")
             }
         });
 
@@ -381,7 +382,7 @@ $(function () {
 
             add_results_in_table_for_items([res]);
 
-            flash_message("Success")
+            flash_message("Item has been retrieved!")
         });
 
         ajax.fail(function (res) {
@@ -424,7 +425,7 @@ $(function () {
                 shopcart_item_update_form_data(firstShopcart)
             }
 
-            flash_message("Success")
+            flash_message("Please see the item search results below!")
         });
 
         ajax.fail(function(res){
@@ -448,7 +449,7 @@ $(function () {
         })
 
         ajax.done(function(res){
-            flash_message("ShopCart Item has been Deleted!")
+            flash_message("ShopCart Item has been deleted!")
         });
 
         ajax.fail(function(res){
@@ -459,5 +460,6 @@ $(function () {
 
     $("#item_clear-btn").click(function () {
         $("#item_search_results").empty()
+        flash_message("")
     })
 })

@@ -20,7 +20,7 @@ Scenario: Place an order
     When I visit the "Home Page"
     And I set the "User" to "2"
     And I press the "Search" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the search result below!"
     When I copy the "Id" field
     And I press the "Clear" button
     Then the "Id" field should be empty
@@ -35,7 +35,7 @@ Scenario: Create an item
     When I visit the "Home Page"
     And I set the "User" to "5"
     And I press the "Create" button
-    Then I should see the message "Success"
+    Then I should see the message "Shopcart has been created!"
     When I copy the "Id" field
     And I press the "Clear" button
     Then the "Id" field should be empty
@@ -46,7 +46,7 @@ Scenario: Create an item
     And I set the item "Amount" to "1"
     And I set the item "Price" to "5.75"
     And I press the item "Create" button
-    Then I should see the message "Success"
+    Then I should see the message "Item has been created!"
     When I copy the item "Shopcart Id" field
     And I press the item "Clear" button
     Then the item "Shopcart Id" field should be empty
@@ -58,13 +58,14 @@ Scenario: Create an item
     When I paste the item "Shopcart Id" field
     And I press the item "List" button
     Then I should see "1000 item_1 5.75 1" in the item results
-    When I paste the item "Shopcart Id" field
+    When I press the item "Clear" button
+    And I paste the item "Shopcart Id" field
     And I set the item "Product Id" to "1000"
     And I set the item "Name" to "item_1"
     And I set the item "Amount" to "1"
     And I set the item "Price" to "5.75"
     And I press the item "Create" button
-    Then I should see the message "Success"
+    Then I should see the message "Item has been created!"
     When I press the item "List" button
     Then I should see "1000 item_1 5.75 2" in the item results
     And I should not see "1000 item_1 5.75 1" in the item results
@@ -73,14 +74,14 @@ Scenario: List items in a shopcart
     When I visit the "Home Page"
     And I set the "User" to "1"
     And I press the "Search" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the search result below!"
     When I copy the "Id" field
     And I press the "Clear" button
     Then the "Id" field should be empty
     And the "User" field should be empty
     When I paste the item "Shopcart Id" field
     And I press the item "List" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the item list results below!"
     And I should see "1000 item_1 5.75 2" in the item results
     And I should see "3000 item_3 10.09 3" in the item results
     
@@ -88,7 +89,7 @@ Scenario: Query items by Product Id
     When I visit the "Home Page"
     And I set the item "Product Id" to "1000"
     And I press the item "Query by Product Id" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the item search results below!"
     And I should see "item_1" in the item "Name" field
     And I should see "2" in the item "Amount" field
     And I should see "5.75" in the item "Price" field
@@ -99,7 +100,7 @@ Scenario: Query items by Name
     When I visit the "Home Page"
     And I set the item "Name" to "item_2"
     And I press the item "Query by Name" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the item search results below!"
     And I should see "2000" in the item "Product Id" field
     And I should see "1" in the item "Amount" field
     And I should see "59.99" in the item "Price" field
@@ -109,7 +110,7 @@ Scenario: Query items by Amount
     When I visit the "Home Page"
     And I set the item "Amount" to "3"
     And I press the item "Query by Amount" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the item search results below!"
     And I should see "3000" in the item "Product Id" field
     And I should see "item_3" in the item "Name" field
     And I should see "10.09" in the item "Price" field
@@ -120,7 +121,7 @@ Scenario: Query items by Price
     And I press the item "Clear" button
     And I set the item "Price" to "5.75"
     And I press the item "Query by Price" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the item search results below!"
     And I should see "1000" in the item "Product Id" field
     And I should see "item_1" in the item "Name" field
     And I should see "2" in the item "Amount" field
@@ -129,14 +130,16 @@ Scenario: Query items by Price
     
 Scenario: Delete an item
     When I visit the "Home Page"
+    And I press the "Clear" button
     And I set the "User" to "1"
     And I press the "Search" button
-    Then the item "Shopcart Id" field should not be empty
+    Then I should see the message "Please see the search result below!"
+    And the item "Shopcart Id" field should not be empty
     When I press the item "List" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the item list results below!"
     When I copy the item "Shopcart Id" field
     When I press the item "Delete" button
-    Then I should see the message "ShopCart Item has been Deleted!"
+    Then I should see the message "ShopCart Item has been deleted!"
     When I press the item "Clear" button
     Then the item "Shopcart Id" field should be empty
     And the item "Id" field should be empty
@@ -152,12 +155,13 @@ Scenario: Delete an item
     And I press the "Clear" button
     And I set the "User" to "2"
     And I press the "Search" button
-    Then the item "Shopcart Id" field should not be empty
+    Then I should see the message "Please see the search result below!"
+    And the item "Shopcart Id" field should not be empty
     When I press the item "List" button
-    Then I should see the message "Success"
+    Then I should see the message "Please see the item list results below!"
     When I copy the item "Shopcart Id" field
     When I press the item "Delete" button
-    Then I should see the message "ShopCart Item has been Deleted!"
+    Then I should see the message "ShopCart Item has been deleted!"
     When I press the item "Clear" button
     Then the item "Shopcart Id" field should be empty
     And the item "Id" field should be empty
@@ -177,7 +181,7 @@ Scenario: Update an item
     And I should see "59.99" in the item "Price" field
     When I set the item "Name" to "item_4"
     And I press the item "Update" button
-    Then I should see the message "Success"
+    Then I should see the message "Item has been updated!"
     When I copy the item "Product Id" field
     And I press the item "Clear" button
     And I paste the item "Product Id" field
