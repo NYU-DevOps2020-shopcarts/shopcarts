@@ -117,6 +117,8 @@ Stop the server with
 
 ## APIs for Shopcart
 
+Please check the latest API Docs and live demo [here](https://nyu-shopcart-service-f20.us-south.cf.appdomain.cloud/apidocs).
+
 ### List
 
 #### HTTP Request

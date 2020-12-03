@@ -30,12 +30,10 @@ PUT /shopcarts/{id}/items/{item_id} - Updates the Shopcart Item
 DELETE /shopcarts/{id}/items/{item_id} - Deletes the Shopcart Item
 """
 
-import sys
-import logging
-from flask import jsonify, request, url_for, make_response, abort
+from flask import jsonify, request, make_response, abort
 from flask.logging import create_logger
 from flask_api import status  # HTTP Status Codes
-from flask_restplus import Api, Resource, fields, reqparse, inputs
+from flask_restplus import Api, Resource, fields, reqparse
 from service.models import Shopcart, ShopcartItem, DataValidationError
 from . import app, constants
 
@@ -213,9 +211,7 @@ def index():
 ######################################################################
 @api.route('/shopcarts', strict_slashes=False)
 class ShopcartCollection(Resource):
-    # ------------------------------------------------------------------
-    # LIST ALL Shopcarts
-    # ------------------------------------------------------------------
+    """LIST ALL Shopcarts"""
     @api.doc('list_shopcarts')
     @api.expect(shopcart_args, validate=True)
     @api.marshal_list_with(shopcart_model)
@@ -245,6 +241,8 @@ class ShopcartCollection(Resource):
     @api.response(201, 'Shopcart created successfully')
     @api.marshal_with(shopcart_model, code=201)
     def post(self):
+        """ Create a Shopcart """
+
         logger.info("Request to create a shopcart")
         check_content_type("application/json")
 
@@ -287,20 +285,23 @@ class ShopcartResource(Resource):
     def get(self, shopcart_id):
         """
             Gets information about a Shopcart
-            This endpoint will get information about a shopcart 
-        """    
+            This endpoint will get information about a shopcart
+        """
         logger.info("Request to get information of a shopcart")
         shopcart = Shopcart.find(shopcart_id)
         if shopcart is None:
             logger.info("Shopcart with ID [%s] not found.", shopcart_id)
-            api.abort(status.HTTP_404_NOT_FOUND, "Shopcart with id '{}' was not found.".format(shopcart_id))
+            api.abort(
+                status.HTTP_404_NOT_FOUND,
+                "Shopcart with id '{}' was not found.".format(shopcart_id)
+            )
 
         shopcart_items = ShopcartItem.find_by_shopcartid(shopcart_id)
         response = shopcart.serialize()
         response["items"] = [item.serialize() for item in shopcart_items]
         logger.info("Shopcart with ID [%s] fetched.", shopcart.id)
         return response, status.HTTP_200_OK
-    
+
     @api.doc('delete_shopcart')
     @api.response(204, 'Shopcart has been deleted')
     def delete(self, shopcart_id):
@@ -347,9 +348,13 @@ class ShopcartItemResource(Resource):
         shopcart_item = ShopcartItem.find(item_id)
 
         if shopcart_item is None or shopcart_item.sid != shopcart_id:
-            logger.info("Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id)
-            api.abort(status.HTTP_404_NOT_FOUND,
-                      "Shopcart item with ID [%s] not found in shopcart [%s]." % (item_id, shopcart_id))
+            logger.info(
+                "Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id
+            )
+            api.abort(
+                status.HTTP_404_NOT_FOUND,
+                "Shopcart item with ID [%s] not found in shopcart [%s]." % (item_id, shopcart_id)
+            )
 
         logger.info("Fetched shopcart item with ID [%s].", item_id)
         return shopcart_item.serialize(), status.HTTP_200_OK
@@ -371,8 +376,13 @@ class ShopcartItemResource(Resource):
         shopcart_item = ShopcartItem.find(item_id)
 
         if shopcart_item is None or shopcart_item.sid != shopcart_id:
-            logger.info("Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id)
-            api.abort(status.HTTP_404_NOT_FOUND, "Shopcart item with id '{}' was not found.".format(item_id))
+            logger.info(
+                "Shopcart item with ID [%s] not found in shopcart [%s].", item_id, shopcart_id
+            )
+            api.abort(
+                status.HTTP_404_NOT_FOUND,
+                "Shopcart item with id '{}' was not found.".format(item_id)
+            )
 
         data = api.payload
         data["sid"] = shopcart_id
@@ -390,7 +400,9 @@ class ShopcartItemResource(Resource):
         Delete a ShopcartItem
         This endpoint will delete a ShopcartItem based the id specified in the path
         """
-        logger.info('Request to delete ShopcartItem with id: %s from Shopcart %s', item_id, shopcart_id)
+        logger.info(
+            'Request to delete ShopcartItem with id: %s from Shopcart %s', item_id, shopcart_id
+        )
         check_content_type("application/json")
 
         shopcart_item = ShopcartItem.find(item_id)
@@ -430,6 +442,9 @@ class ShopcartItemCollection(Resource):
     @api.expect(shopcart_item_model)
     @api.marshal_with(shopcart_item_model, code=201)
     def post(self, shopcart_id):
+        """
+        Create a new Shopcart Item
+        """
         logger.info("Request to create a shopcart item")
         check_content_type("application/json")
 
@@ -451,14 +466,14 @@ class ShopcartItemCollection(Resource):
 
         return shopcart_item, status.HTTP_201_CREATED, {"Location": location_url}
 
+
 ######################################################################
 #  PATH: /shopcarts/items
 ######################################################################
 @api.route('/shopcarts/items', strict_slashes=False)
 class ShopcartItemQueryCollection(Resource):
-    # ------------------------------------------------------------------
-    # LIST ALL Shopcart Items or Query by sku, name, price, or amount
-    # ------------------------------------------------------------------
+    """LIST ALL Shopcart Items or Query by sku, name, price, or amount"""
+
     @api.doc('list_shopcart_items')
     @api.expect(shopcart_item_args, validate=True)
     @api.marshal_list_with(shopcart_item_model)
@@ -507,30 +522,35 @@ class PlaceOrderResource(Resource):
         logger.info('Request to place order for Shopcart with id: %s', shopcart_id)
 
         shopcart = Shopcart.find(shopcart_id)
-        if shopcart:
-            shopcart_items = ShopcartItem.find_by_shopcartid(shopcart_id)
-            if shopcart_items is None or len(shopcart_items) == 0:
-                logger.info("Shopcart with ID [%s] is empty.", shopcart_id)
-                api.abort(status.HTTP_404_NOT_FOUND, "Shopcart with ID [%s] is empty." % shopcart_id)
-            shopcart_items_list = [item.serialize() for item in shopcart_items]
 
-            # once we have the list of shopcart items we can send in JSON format to the orders team
-            # SEND shocart_items_list TO ORDERS TEAM
+        if not shopcart:
+            logger.info("Shopcart with ID [%s] is does not exist.", shopcart_id)
+            api.abort(
+                status.HTTP_404_NOT_FOUND,
+                "Shopcart with ID [%s] is does not exist." % shopcart_id
+            )
 
-            shopcart.delete()
+        shopcart_items = ShopcartItem.find_by_shopcartid(shopcart_id)
+        if shopcart_items is None or len(shopcart_items) == 0:
+            logger.info("Shopcart with ID [%s] is empty.", shopcart_id)
+            api.abort(
+                status.HTTP_404_NOT_FOUND,
+                "Shopcart with ID [%s] is empty." % shopcart_id
+            )
+        shopcart_items_list = [item.serialize() for item in shopcart_items]
 
-            logger.info('Shopcart with id: %s has been deleted', shopcart_id)
-            return make_response("", status.HTTP_204_NO_CONTENT)
+        # once we have the list of shopcart items we can send in JSON format to the orders team
+        # SEND shocart_items_list TO ORDERS TEAM
 
-        logger.info("Shopcart with ID [%s] is does not exist.", shopcart_id)
-        api.abort(status.HTTP_404_NOT_FOUND, "Shopcart with ID [%s] is does not exist." % shopcart_id)
+        shopcart.delete()
+
+        logger.info('Shopcart with id: %s has been deleted', shopcart_id)
+        return make_response("", status.HTTP_204_NO_CONTENT)
 
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
-
-
 def check_content_type(content_type):
     """ Checks that the media type is correct """
     if 'Content-Type' not in request.headers:

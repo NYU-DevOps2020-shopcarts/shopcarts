@@ -43,4 +43,4 @@ jobs:
 
 after_success:
   - codecov
-  - pylint service
+  - pylint service tests

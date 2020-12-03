@@ -18,8 +18,6 @@ Test cases can be run with:
 """
 
 import unittest
-import os
-from datetime import datetime
 from service.models import Shopcart, ShopcartItem, DataValidationError, db
 from service import app
 from config import DATABASE_URI
@@ -38,11 +36,6 @@ class TestShopcarts(unittest.TestCase):
         # Set up the test database
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         Shopcart.init_db(app)
-
-    @classmethod
-    def tearDownClass(cls):
-        """ These run once after Test suite """
-        pass
 
     def setUp(self):
         db.drop_all()  # clean up the last tests
@@ -154,10 +147,8 @@ class TestShopcarts(unittest.TestCase):
     def test_all_shopcarts(self):
         """ Get all Shopcarts"""
         count = 5
-        itr = 1
-        for i in range(count):
-            Shopcart(id=itr, user_id=(itr + 1)).create()
-            itr = itr + 1  # generating a random id
+        for i in range(1, count + 1):
+            Shopcart(id=i, user_id=(i + 1)).create()
         shopcarts_queried = Shopcart.all()
         self.assertEqual(len(shopcarts_queried), count)
 
@@ -179,11 +170,6 @@ class TestShopcartItems(unittest.TestCase):
         # Set up the test database
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         ShopcartItem.init_db(app)
-
-    @classmethod
-    def tearDownClass(cls):
-        """ These run once after Test suite """
-        pass
 
     def setUp(self):
         db.drop_all()  # clean up the last tests

@@ -13,7 +13,6 @@ from behave import *
 from compare import expect, ensure
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions
 
 WAIT_SECONDS = int(getenv('WAIT_SECONDS', '60'))
@@ -30,7 +29,7 @@ def step_impl(context):
         context.resp = requests.delete(context.base_url + '/api/shopcarts/' + str(item["sid"]) +
                        '/items/' + str(item["id"]), headers=headers)
         expect(context.resp.status_code).to_equal(204)
-    
+
     create_url = context.base_url + '/api/shopcarts'
     for row in context.table:
         # Get the shopcart ID by querying the user ID
@@ -132,7 +131,7 @@ def step_impl(context, name):
     error_msg = "I should not see '%s' in '%s'" % (name, element.text)
     ensure(name in element.text, False, error_msg)
 
-    
+
 ##################################################################
 # This code works because of the following naming convention:
 # The id field for text input in the html is the element name
