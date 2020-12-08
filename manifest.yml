@@ -1,12 +1,14 @@
 ---
 # This manifest deploys a Python Flask application with a Cloudant database
+# The same manifest will be used for both dev and prod deployment.
+# Please use `--var` during `cf push` to substitute `appname` and `route` to specific value
 applications:
-- name: nyu-shopcart-service-f20
+- name: ((appname))
   path: .
   instances: 1
   memory: 512M
   routes:
-  - route: nyu-shopcart-service-f20.us-south.cf.appdomain.cloud
+  - route: ((route))
   disk_quota: 1024M
   buildpacks:
   - python_buildpack
