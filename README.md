@@ -95,7 +95,7 @@ Stop the server with
 | sku         | int      | Product/Item id                                      |
 | name        | string   | Name of product/item                                 |
 | price       | float    | Price of the product/item                            |
-| amount      | float    | Count of the item in the shopcart                    |
+| amount      | int      | Count of the item in the shopcart                    |
 | create_time | datetime | Time when item was added to the shopcart             |
 | update_time | datetime | Time when the item in the shopcart was last modified |
 
@@ -361,7 +361,7 @@ If the shopcart is empty, you will receive 404 Not Found.
 | sku    | int    |
 | name   | string |
 | price  | float  |
-| amount | float  |
+| amount | int    |
 
 #### Example Request
 
@@ -440,7 +440,7 @@ curl -L -H 'Content-Type: application/json' \
 | sku     | int    |
 | name    | string |
 | price   | float  |
-| amount  | float  |
+| amount  | int    |
 
 #### Example Request
 
@@ -500,7 +500,7 @@ Please provide only one of the following parameters:
 | sku     | int    |
 | name    | string |
 | price   | float  |
-| amount  | float  |
+| amount  | int    |
 
 #### Example Request
 

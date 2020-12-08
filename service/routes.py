@@ -29,7 +29,9 @@ GET /shopcarts/{id}/items/{item_id} - Returns the Shopcart Item with given id an
 PUT /shopcarts/{id}/items/{item_id} - Updates the Shopcart Item
 DELETE /shopcarts/{id}/items/{item_id} - Deletes the Shopcart Item
 """
-
+import os
+import json
+import requests
 from flask import jsonify, request, make_response, abort
 from flask.logging import create_logger
 from flask_api import status  # HTTP Status Codes
@@ -39,6 +41,9 @@ from . import app, constants
 
 # use create_logger function to avoid no-member errors for logger in pylint
 logger = create_logger(app)
+
+ORDER_ENDPOINT = os.getenv('ORDER_ENDPOINT',
+                           'https://nyu-order-service-f20.us-south.cf.appdomain.cloud/orders')
 
 ######################################################################
 # Configure Swagger before initializing it
@@ -68,7 +73,7 @@ shopcart_item_model = api.model('ShopcartItem', {
                           description='The product name'),
     'price': fields.Float(required=True,
                           description='The price for one item'),
-    'amount': fields.Float(required=True,
+    'amount': fields.Integer(required=True,
                            description='The number of product'),
     'create_time': fields.DateTime(readOnly=True,
                                    description='The time the record is created'),
@@ -100,7 +105,7 @@ create_shopcart_item_model = api.model('ShopcartItem', {
                           description='The product name'),
     'price': fields.Float(required=True,
                           description='The price for one item'),
-    'amount': fields.Float(required=True,
+    'amount': fields.Integer(required=True,
                            description='The number of product')
 })
 
@@ -122,7 +127,7 @@ shopcart_item_args.add_argument('price',
                                 required=False,
                                 help='Find Shopcart Item by Product Price')
 shopcart_item_args.add_argument('amount',
-                                type=float,
+                                type=int,
                                 required=False,
                                 help='Find Shopcart Item by Product Amount')
 
@@ -513,6 +518,7 @@ class PlaceOrderResource(Resource):
     """ Place Order action on a Shopcart"""
     @api.doc('place_order')
     @api.response(404, 'Shopcart not found or is empty')
+    @api.response(400, 'Unable to place order for shopcart')
     @api.response(204, 'Shopcart has been deleted')
     def put(self, shopcart_id):
         """
@@ -540,10 +546,34 @@ class PlaceOrderResource(Resource):
         shopcart_items_list = [item.serialize() for item in shopcart_items]
 
         # once we have the list of shopcart items we can send in JSON format to the orders team
-        # SEND shocart_items_list TO ORDERS TEAM
+        #add the order status as PLACED for a new order
+        order_items= []
+        for item in shopcart_items_list:
+            order_item = {}
+            order_item["item_id"] = int(item["id"])
+            order_item["product_id"] = int(item["sku"])
+            order_item["quantity"] = int(item["amount"])
+            order_item["price"] = item["price"]
+            order_item["status"] = "PLACED"
+            order_items.append(order_item)
+        order = {
+            "customer_id": int(shopcart.serialize()["user_id"]),
+            "order_items": order_items,
+        }
+        payload = json.dumps(order)
+        headers = {'content-type': 'application/json'}
+        res = requests.post(
+                ORDER_ENDPOINT, data=payload, headers=headers
+            )
+        logger.info('Put Order response %d %s', res.status_code, res.text)
+
+        if res.status_code != 201:
+            api.abort(
+                status.HTTP_400_BAD_REQUEST,
+                "Unable to place order for shopcart [%s]." % shopcart_id
+            )
 
         shopcart.delete()
-
         logger.info('Shopcart with id: %s has been deleted', shopcart_id)
         return make_response("", status.HTTP_204_NO_CONTENT)
 

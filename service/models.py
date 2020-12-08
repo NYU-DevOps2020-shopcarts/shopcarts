@@ -31,7 +31,7 @@ sid (int) - shop cart id
 sku (int) - product id
 name (string) - product name
 price (float) - price for one
-amount (float) - number of product
+amount (int) - number of product
 create_time (DateTime) - the time this product was created
 update_time (DateTime) - the time this product was updated
 """
@@ -187,7 +187,7 @@ class ShopcartItem(db.Model):
     sku = db.Column(db.Integer)
     name = db.Column(db.String)
     price = db.Column(db.Float)
-    amount = db.Column(db.Float)
+    amount = db.Column(db.Integer)
     create_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     update_time = db.Column(db.DateTime,
                             nullable=False,
@@ -279,7 +279,7 @@ class ShopcartItem(db.Model):
             self.sku = int(data["sku"])
             self.name = str(data["name"])
             self.price = float(data["price"])
-            self.amount = float(data["amount"])
+            self.amount = int(data["amount"])
             if self.price < 0 or self.amount <= 0:
                 raise ValueError
         except KeyError as error:
