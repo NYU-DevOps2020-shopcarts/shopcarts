@@ -19,14 +19,23 @@ $(function () {
         $("#shopcart_search_results").empty();
 
         var firstShopcart = null;
+
         for(var i = 0; i < res.length; i++) {
             var shopcart = res[i];
-            var row = "<tr><td>"+shopcart.id+"</td><td>"+shopcart.user_id+"</td><td>"+shopcart.create_time+"</td><td>"+shopcart.update_time+"</td><td></td></tr>";
+            var row = `<tr><td>${shopcart.id}</td><td>${shopcart.user_id}</td><td>`
+                + `<button class="btn btn-primary btn-sm shopcart_retrieve-btn" data-shopcart-id="${shopcart.id}">Retrieve</button> `
+                + `<button class="btn btn-info btn-sm shopcart_list-btn" data-shopcart-id="${shopcart.id}">List</button> `
+                + `<button class="btn btn-primary btn-sm shopcart_order-btn" data-shopcart-id="${shopcart.id}">Place Order</button> `
+                + `<button class="btn btn-danger btn-sm shopcart_delete-btn" data-shopcart-id="${shopcart.id}">Delete</button>`
+                + `</td></tr>`;
             $("#shopcart_search_results").append(row);
             if (i === 0) {
                 firstShopcart = shopcart;
             }
         }
+
+        shopcart_list_bind_events()
+
         return firstShopcart;
     }
 
@@ -112,6 +121,8 @@ $(function () {
         })
 
         ajax.done(function(res){
+            $("#shopcart_clear-btn").click()
+            $("#item_clear-btn").click()
             flash_message("Shopcart has been deleted!")
         });
 
@@ -195,6 +206,11 @@ $(function () {
             type: "GET",
             url: "/api/shopcarts/" + shopcart_id + "/items",
             success: function(shopcart_data){
+                if (shopcart_data.length === 0) {
+                    alert(`Shopcart [${shopcart_id}] is empty!`)
+                    return
+                }
+
                 // Place order
                 $.ajax({
                     type: "PUT",
@@ -221,6 +237,30 @@ $(function () {
         flash_message("")
     })
 
+    function shopcart_list_bind_events() {
+        // Those events have to be bound after the buttons pop up
+
+        $(".shopcart_retrieve-btn").click(function () {
+            $("#shopcart_id").val($(this).data("shopcart-id"))
+            $("#shopcart_retrieve-btn").click()
+        })
+
+        $(".shopcart_list-btn").click(function () {
+            $("#item_shopcart_id").val($(this).data("shopcart-id"))
+            $("#item_list-btn").click()
+        })
+
+        $(".shopcart_order-btn").click(function () {
+            $("#shopcart_id").val($(this).data("shopcart-id"))
+            $("#shopcart_order-btn").click()
+        })
+
+        $(".shopcart_delete-btn").click(function () {
+            $("#shopcart_id").val($(this).data("shopcart-id"))
+            $("#shopcart_delete-btn").click()
+        })
+    }
+
     // Updates the form with data from the response
     function shopcart_item_update_form_data(res) {
         $("#item_shopcart_id").val(res.sid);
@@ -244,12 +284,15 @@ $(function () {
                 "<td>"+shopcart_item.name+"</td>"+
                 "<td>"+shopcart_item.price+"</td>"+
                 "<td>"+shopcart_item.amount+"</td>"+
-                "<td></td></tr>";
+                "<td>"+`<button class="btn btn-primary btn-sm item_retrieve-btn" data-item-id="${shopcart_item.id}">Retrieve</button> `
+                +`<button class="btn btn-danger btn-sm item_delete-btn" data-item-id="${shopcart_item.id}">Delete</button>` + "</td></tr>";
             $("#item_search_results").append(row);
             if (i === 0) {
                 firstShopcartItem = shopcart_item;
             }
         }
+
+        item_list_bind_events()
 
         return firstShopcartItem
     }
@@ -449,6 +492,7 @@ $(function () {
         })
 
         ajax.done(function(res){
+            $("#item_clear-btn").click()
             flash_message("ShopCart Item has been deleted!")
         });
 
@@ -462,4 +506,16 @@ $(function () {
         $("#item_search_results").empty()
         flash_message("")
     })
+
+    function item_list_bind_events() {
+        $(".item_retrieve-btn").click(function () {
+            $("#item_id").val($(this).data("item-id"))
+            $("#item_retrieve-btn").click()
+        })
+
+        $(".item_delete-btn").click(function () {
+            $("#item_id").val($(this).data("item-id"))
+            $("#item_delete-btn").click()
+        })
+    }
 })

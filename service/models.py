@@ -148,7 +148,7 @@ class Shopcart(db.Model):
     def all(cls):
         """ Returns all of the Shopcarts in the database """
         cls.logger.info("Processing all Shopcarts")
-        return cls.query.all()
+        return cls.query.order_by(cls.id).all()
 
     @classmethod
     def find(cls, sid):
@@ -313,7 +313,7 @@ class ShopcartItem(db.Model):
     def all(cls):
         """ Returns all of the Shopcart Items in the database """
         cls.logger.info("Processing all Shopcart Items")
-        return cls.query.all()
+        return cls.query.order_by(cls.id).all()
 
     @classmethod
     def find_by_sku(cls, sku: int):
@@ -325,7 +325,7 @@ class ShopcartItem(db.Model):
             :rtype: list
         """
         cls.logger.info("Processing sku query for %s ...", sku)
-        return cls.query.filter(cls.sku == sku).all()
+        return cls.query.filter(cls.sku == sku).order_by(cls.id).all()
 
     @classmethod
     def find_by_name(cls, name: str):
@@ -337,7 +337,7 @@ class ShopcartItem(db.Model):
             :rtype: list
         """
         cls.logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.name == name).all()
+        return cls.query.filter(cls.name == name).order_by(cls.id).all()
 
     @classmethod
     def find_by_price(cls, price: float):
@@ -350,7 +350,7 @@ class ShopcartItem(db.Model):
             :rtype: list
         """
         cls.logger.info("Processing price query for %s ...", price)
-        return cls.query.filter(cls.price == price).all()
+        return cls.query.filter(cls.price == price).order_by(cls.id).all()
 
     @classmethod
     def find_by_amount(cls, amount: int):
@@ -363,13 +363,13 @@ class ShopcartItem(db.Model):
             :rtype: list
         """
         cls.logger.info("Processing sku amount for %s ...", amount)
-        return cls.query.filter(cls.amount == amount).all()
+        return cls.query.filter(cls.amount == amount).order_by(cls.id).all()
 
     @classmethod
     def find_by_shopcartid(cls, sid):
         """ Finds a items in a shopcart based on the shopcart id provided """
         cls.logger.info("Processing lookup or 404 for id %s ...", sid)
-        return cls.query.filter_by(sid=sid).all()
+        return cls.query.filter_by(sid=sid).order_by(cls.id).all()
 
     @classmethod
     def find(cls, item_id):

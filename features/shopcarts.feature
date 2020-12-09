@@ -65,7 +65,8 @@ Scenario: Delete a shopcart
     When I paste the "Id" field
     And I press the "Delete" button
     Then I should see the message "Shopcart has been deleted!"
-    When I press the "Retrieve" button
+    When I paste the "Id" field
+    And I press the "Retrieve" button
     Then I should see the message "not found"
     When I set the "User" to "1"
     When I press the "Search" button
