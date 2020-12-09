@@ -266,8 +266,10 @@ class ShopcartCollection(Resource):
         logger.info("Shopcart with ID [%s] created.", shopcart.id)
 
         location_url = api.url_for(ShopcartResource, shopcart_id=shopcart.id, _external=True)
-
-        return shopcart.serialize(), status.HTTP_201_CREATED, {"Location": location_url}
+        shopcart_result = shopcart.serialize()
+        items = ShopcartItem.find_by_shopcartid(shopcart_result["id"])
+        shopcart_result["items"] = [item.serialize() for item in items]
+        return shopcart_result, status.HTTP_201_CREATED, {"Location": location_url}
 
 
 ######################################################################
@@ -348,7 +350,6 @@ class ShopcartItemResource(Resource):
         This endpoint will return an item in the shop cart
         """
         logger.info("Request to get an item in a shopcart")
-        check_content_type("application/json")
 
         shopcart_item = ShopcartItem.find(item_id)
 
@@ -408,7 +409,6 @@ class ShopcartItemResource(Resource):
         logger.info(
             'Request to delete ShopcartItem with id: %s from Shopcart %s', item_id, shopcart_id
         )
-        check_content_type("application/json")
 
         shopcart_item = ShopcartItem.find(item_id)
 
