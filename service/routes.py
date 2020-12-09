@@ -234,6 +234,10 @@ class ShopcartCollection(Resource):
             shopcarts = Shopcart.all()
 
         results = [shopcart.serialize() for shopcart in shopcarts]
+        for shopcart in results:
+            items = ShopcartItem.find_by_shopcartid(shopcart["id"])
+            shopcart["items"] = [item.serialize() for item in items]
+
         logger.info('[%s] Shopcarts returned', len(results))
         return results, status.HTTP_200_OK
 
